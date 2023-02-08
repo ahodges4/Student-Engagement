@@ -66,3 +66,11 @@ section{
     height: 14px;
 }
 
+
+.card--button--div{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+

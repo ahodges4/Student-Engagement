@@ -2,24 +2,17 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import Navbar from './Components/Navbar';
+import ReturnField from './Components/ReturnField';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-const isMobile = window.innerWidth <= 500;
-if (isMobile){
-  console.log("Mobile")
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
-}else{
-  root.render(
-    <React.StrictMode>
-      <App />
-    </React.StrictMode>
-  );
-}
-
+root.render(
+  <React.StrictMode>
+    <Navbar></Navbar>
+    <ReturnField/>
+    <App />
+  </React.StrictMode>
+);
 
 // If you want to start measuring performance in your app, pass a function
 // to log results (for example: reportWebVitals(console.log))

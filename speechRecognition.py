@@ -142,7 +142,7 @@ def main():
     # for a list of supported languages.
     language_code = "en-US"  # a BCP-47 language tag
 
-    client = speech.SpeechClient.from_service_account_json("service-account-file.json")
+    client = speech.SpeechClient.from_service_account_json("C:/Users/Monke/speechrecognition-key.json")
     config = speech.RecognitionConfig(
         encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
         sample_rate_hertz=RATE,
