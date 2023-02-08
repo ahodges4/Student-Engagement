@@ -23,7 +23,7 @@ export default function ReturnField(){
                 recordAudio = RecordRTC(stream, {
                 type: 'audio',
                 mimeType: 'audio/webm',
-                desiredSampRate: 1600,
+                desiredSampRate: 16000,
                 
                 recorderType: StereoAudioRecorder,
                 numberOfAudioChannels: 1,

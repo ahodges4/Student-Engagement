@@ -10,7 +10,7 @@ async def audio_stream(websocket, path):
 
     stream = p.open(format=p.get_format_from_width(2),
                     channels=1,
-                    rate=44100,
+                    rate=16000,
                     output=True,
                     frames_per_buffer=1024)
 
