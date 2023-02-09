@@ -33,12 +33,13 @@ export default function ReturnField(){
                 // get intervals based blobs
                 // value in milliseconds
                 // as you might not want to make detect calls every seconds
-                timeSlice: 4000,
+                timeSlice: 5000,
 
                 //2)
                 // as soon as the stream is available
                 ondataavailable: function(blob) {
                     sendMessage(blob);
+                    console.log(blob);
                 }
             });
 
