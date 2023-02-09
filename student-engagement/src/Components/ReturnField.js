@@ -1,22 +1,21 @@
 import React, { useState } from "react";
 import useWebSocket from "react-use-websocket";
 import RecordRTC, { StereoAudioRecorder } from "recordrtc";
-import io from 'socket.io-client';
+
 
 
 export default function ReturnField(){
     const [socketUrl, setSocketUrl] = useState("ws://localhost:8000/");
+    
     const [isRecording, setIsRecording] = useState(false);
 
     const {sendMessage, socketMessage} = useWebSocket(socketUrl);
     let recordAudio;
 
-    const socketio = io();
-    const socket = socketio.on('connect', function() {
-        console.log("Connected");
-    });
+    
 
     const handleStartRecording = () => {
+        
         navigator.getUserMedia({
             audio: true
         }, function(stream) {
@@ -29,13 +28,10 @@ export default function ReturnField(){
                 numberOfAudioChannels: 1,
 
 
-                //1)
                 // get intervals based blobs
                 // value in milliseconds
-                // as you might not want to make detect calls every seconds
                 timeSlice: 5000,
 
-                //2)
                 // as soon as the stream is available
                 ondataavailable: function(blob) {
                     sendMessage(blob);

@@ -42,7 +42,7 @@ async def audio_stream(websocket, path):
     #                 rate=16000,
     #                 output=True,
     #                 frames_per_buffer=1024)
-
+    print(websocket)
     buffer = []
     while True:
         audio_data = await websocket.recv()
