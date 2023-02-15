@@ -6,21 +6,19 @@ import wave
 import functools
 
 
-class AudioStream:
-    global transcriptID
-    transcriptID = ""
-    global transcript
-    transcript = []
-    global running
-    running = True
-    global buffer
-    buffer = []
 
+class AudioStream:
     def __init__(self, transcriptID):
         self.transcriptID = transcriptID
-    global transcribe_file
+        self.buffer = []
+        self.running = True
+        self.transcript = []
 
-    def transcribe_file(speech_file):
+        start_server = websockets.serve(self.audio_stream, "localhost", 8000)
+        asyncio.get_event_loop().run_until_complete(start_server)
+        asyncio.get_event_loop().run_forever()
+
+    def transcribe_file(self, speech_file):
         """Transcribe the given audio file."""
         from google.cloud import speech
         import io
@@ -46,47 +44,28 @@ class AudioStream:
         for result in response.results:
             # The first alternative is the most likely one for this portion.
             print("Transcript: {}".format(result.alternatives[0].transcript))
-            transcript.append(result.alternatives[0].transcript)
-        print(transcript)
+            self.transcript.append(result.alternatives[0].transcript)
+        print(self.transcript)
 
-    async def audio_stream(websocket, path):
-        # Initialize the PyAudio object
-        # p = pyaudio.PyAudio()
-
-        # stream = p.open(format=p.get_format_from_width(2),
-        #                 channels=1,
-        #                 rate=16000,
-        #                 output=True,
-        #                 frames_per_buffer=1024)
-
-        print(running)
-        buffer = []
-        while running:
+    async def audio_stream(self, websocket, path):
+        while self.running:
             audio_data = await websocket.recv()
             decoded_data = np.frombuffer(audio_data, np.int16)
-            # Write the audio data to the PyAudio stream
 
-            buffer.append(decoded_data)
+            self.buffer.append(decoded_data)
 
-            if len(buffer) == 3:
-                audio = np.concatenate(buffer)
+            if len(self.buffer) == 3:
+                audio = np.concatenate(self.buffer)
 
-                with wave.open("output"+transcriptID+".wav", "wb") as f:
+                with wave.open("output"+self.transcriptID+".wav", "wb") as f:
                     f.setnchannels(1)
                     f.setsampwidth(2)
                     f.setframerate(16000)
                     f.writeframes(audio.tobytes())
                 print("Saved")
-                transcribe_file("output"+transcriptID+".wav")
-                buffer = []
-
-    start_server = websockets.serve(audio_stream, "localhost", 8000)
-
-    asyncio.get_event_loop().run_until_complete(start_server)
-
-    asyncio.get_event_loop().run_forever()
+                self.transcribe_file("output"+self.transcriptID+".wav")
+                self.buffer = []
 
 
-# TODO:
 
-# 2. Create Rest API
+

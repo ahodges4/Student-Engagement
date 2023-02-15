@@ -3,6 +3,8 @@ import pymysql
 from flaskext.mysql import MySQL
 from flask import jsonify, Flask, request
 from audioStream import AudioStream
+import asyncio
+import traceback
 
 app = Flask(__name__)
 
@@ -93,16 +95,19 @@ def open_audio_stream():
 
         # get the ID of the newly created record
         transcriptID = cursor.lastrowid
+
         # start audio stream
         activate_audio_stream(transcriptID)
-
+        
         return jsonify({"audioStreamID": transcriptID})
-    except:
-        return jsonify({'error': 'Failed to create audio stream'})
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(f"Error: {e}\n{tb}")
+        return jsonify({'error': 'Failed to create audio stream : ' + str(e)})
 
 
 def activate_audio_stream(transcriptID):
-    # print("Hello I am a new AudioStream")
+    print("Hello I am a new AudioStream")
     activeAudioStreams[transcriptID] = AudioStream(transcriptID)
 
 
@@ -122,4 +127,4 @@ def get_current_transcript(id):
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
