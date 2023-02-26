@@ -5,10 +5,10 @@ import numpy
 from strsimpy.normalized_levenshtein import NormalizedLevenshtein
 from nltk.corpus import brown
 from nltk.corpus import stopwords
-from mcq_gen import Get_Sentences
-from mcq_gen import Get_Possible_Answers
-from mcq_gen import Find_Setences_With_Keyword
-from mcq_gen import Get_Multi_Choice_Questions
+from question_generation.mcq_gen import Get_Sentences
+from question_generation.mcq_gen import Get_Possible_Answers
+from question_generation.mcq_gen import Find_Setences_With_Keyword
+from question_generation.mcq_gen import Get_Multi_Choice_Questions
 from transformers import T5ForConditionalGeneration, T5Tokenizer
 import spacy
 import torch

@@ -5,12 +5,15 @@ import pymysql
 from flaskext.mysql import MySQL
 from flask import jsonify, Flask, request
 from audioStream import AudioStream
+from question_generation.main import Question_Generator
 import asyncio
 import traceback
 
 app = Flask(__name__)
 
 activeAudioStreams = {}
+
+Qgen = Question_Generator()
 
 # Enable CORS to allow cross-origin requests
 CORS(app)
@@ -78,7 +81,12 @@ def update_transcript(id):
     transcript = request.get_json()['transcript']
 
     # Execute the UPDATE query
+
     try:
+        cursor.execute("SELECT * FROM transcripts WHERE id = %s", (id,))
+        result = cursor.fetchone()
+        if result == None:
+            return jsonify({'error': 'No transcript with that ID'})
         cursor.execute(
             "UPDATE transcripts SET transcript = %s WHERE id = %s", (transcript, id))
         conn.commit()
@@ -125,6 +133,44 @@ async def open_audio_stream():
 def get_current_transcript(id):
     if id in activeAudioStreams:
         return jsonify({"transcript": "{}".format(activeAudioStreams[id].transcript)})
+
+
+# Requires body of input_text
+@app.route('/generateQuestions', methods=['POST'])
+def generate_questions():
+    try:
+        text = request.get_json()
+
+        questions = Qgen.generate_MCQs(text)
+
+        return questions
+
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(f"Error: {e}\n{tb}")
+        return jsonify({'error': 'Failed to create questions : ' + str(e)})
+
+# Requires body of id
+
+
+@app.route('/generateTranscriptQuestions/<id>', methods=['POST'])
+def generate_questions_from_transcripts(id):
+    try:
+        cursor.execute("SELECT * FROM transcripts WHERE id = %s", (id,))
+        result = cursor.fetchone()
+        if result == None:
+            return jsonify({"error": "Transcript not found with ID " + str(id)})
+        print(result["transcript"])
+        text = {"input_text": result["transcript"]}
+
+        questions = Qgen.generate_MCQs(text)
+
+        return questions
+
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(f"Error: {e}\n{tb}")
+        return jsonify({'error': 'Failed to create questions of transcript : ' + str(e)})
 
 
 if __name__ == '__main__':
