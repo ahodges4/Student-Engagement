@@ -1,3 +1,5 @@
+import os
+import sys
 from flask_cors import CORS, cross_origin
 import pymysql
 from flaskext.mysql import MySQL
@@ -97,8 +99,10 @@ def open_audio_stream():
         transcriptID = cursor.lastrowid
 
         # start audio stream
-        activate_audio_stream(transcriptID)
-        
+        print("Creating Audio Stream")
+        NewAudioStream = AudioStream(transcriptID)
+        NewAudioStream.start()
+        print("Audio Stream created")
         return jsonify({"audioStreamID": transcriptID})
     except Exception as e:
         tb = traceback.format_exc()
@@ -106,18 +110,13 @@ def open_audio_stream():
         return jsonify({'error': 'Failed to create audio stream : ' + str(e)})
 
 
-def activate_audio_stream(transcriptID):
-    print("Hello I am a new AudioStream")
-    activeAudioStreams[transcriptID] = AudioStream(transcriptID)
-
-
-@app.route('/closeAudioStream/<id>', methods=['GET'])
-def close_audio_stream(id):
-    if id in activeAudioStreams:
-        del activeAudioStreams[id]
-        return jsonify({"message": "Instance with ID {} closed successfully".format(id)})
-    else:
-        return jsonify({"error": "Instance with ID {} not found".format(id)})
+# @app.route('/closeAudioStream/<id>', methods=['GET'])
+# def close_audio_stream(id):
+#     if id in activeAudioStreams:
+#         del activeAudioStreams[id]
+#         return jsonify({"message": "Instance with ID {} closed successfully".format(id)})
+#     else:
+#         return jsonify({"error": "Instance with ID {} not found".format(id)})
 
 
 @app.route('/getCurrentTranscript/<id>', methods=['GET'])
