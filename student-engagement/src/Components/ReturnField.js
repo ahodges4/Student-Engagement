@@ -1,6 +1,10 @@
 import React, { useState } from "react";
 import useWebSocket from "react-use-websocket";
 import RecordRTC, { StereoAudioRecorder } from "recordrtc";
+import { useParams } from "react-router-dom";
+
+
+import { Link } from "react-router-dom"
 
 
 
@@ -12,7 +16,9 @@ export default function ReturnField(){
     const {sendMessage, socketMessage} = useWebSocket(socketUrl);
     let recordAudio;
 
-    
+    const {audioStreamID} = useParams();
+
+    const textarea = document.querySelector(".ReturnField--transcript");
 
     const handleStartRecording = () => {
         
@@ -36,7 +42,19 @@ export default function ReturnField(){
                 ondataavailable: function(blob) {
                     sendMessage(blob);
                     console.log(blob);
+
+                    fetch(`http://127.0.0.1:5000/transcripts/${audioStreamID}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log(data);
+                        textarea.value = data.transcript;
+                    })
+                    .catch(error => {
+                        console.error(error);
+                      });
                 }
+
+
             });
 
             recordAudio.startRecording();
@@ -53,6 +71,7 @@ export default function ReturnField(){
         <div className="container">
             <textarea rows="10" cols="50" className="ReturnField--transcript"></textarea>
             <button className="ReturnField--button" onClick={handleStartRecording} disabled={isRecording}>Start Recording Speech</button>
+            {audioStreamID}
         </div>
     )
 }

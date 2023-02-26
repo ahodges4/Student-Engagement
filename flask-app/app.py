@@ -120,6 +120,18 @@ async def open_audio_stream():
         return jsonify({'error': 'Failed to create audio stream : ' + str(e)})
 
 
+@app.route('/closeAudioStream/<id>', methods=['POST'])
+def closeAudioStream(id):
+    # print(activeAudioStreams)
+
+    try:
+        activeAudioStreams[id].running = False
+        del activeAudioStreams[id]
+        return jsonify({"200": "OK"})
+    except Exception as e:
+        print(e)
+        return jsonify({"Error : ": str(e)})
+
 # @app.route('/closeAudioStream/<id>', methods=['GET'])
 # def close_audio_stream(id):
 #     if id in activeAudioStreams:

@@ -1,19 +1,26 @@
 import asyncio
+import sys
 import websockets
 import numpy as np
 import pyaudio
 import wave
 import functools
 import threading
+import requests
 
 
 class AudioStream:
     def __init__(self, transcriptID):
+        self.websocket_server = None
         self.loop = asyncio.get_event_loop()
         self.transcriptID = transcriptID
         self.buffer = []
         self.running = True
         self.transcript = []
+        self.transcriptUrl = "http://127.0.0.1:5000/transcripts/" + \
+            str(transcriptID)
+        self.endUrl = "http://127.0.0.1:5000/closeAudioStream/" + \
+            str(transcriptID)
 
     def transcribe_file(self, speech_file):
         """Transcribe the given audio file."""
@@ -44,11 +51,19 @@ class AudioStream:
             self.transcript.append(result.alternatives[0].transcript)
         print(self.transcript)
 
+        payload = {"transcript": ' '.join(
+            str(text) for text in self.transcript)}
+
+        x = requests.put(self.transcriptUrl, json=payload)
+
+        print(x.text)
+
     async def audio_stream(self, websocket, path):
         print("Audio Stream called")
         while self.running:
             print("Awaiting Data")
             audio_data = await websocket.recv()
+
             decoded_data = np.frombuffer(audio_data, np.int16)
 
             self.buffer.append(decoded_data)
@@ -69,10 +84,14 @@ class AudioStream:
         self.loop = asyncio.new_event_loop()
 
         asyncio.set_event_loop(self.loop)
-        start_server = websockets.serve(self.audio_stream, "localhost", 8000)
+        start_server = websockets.serve(
+            self.audio_stream, "localhost", 8000)
         asyncio.get_event_loop().run_until_complete(start_server)
 
-        asyncio.get_event_loop().run_forever()
+        try:
+            asyncio.get_event_loop().run_forever()
+        finally:
+            self.loop.close()
 
     def start_in_loop(self):
         audio_thread = threading.Thread(target=self.start)
