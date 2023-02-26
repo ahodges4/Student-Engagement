@@ -88,7 +88,7 @@ def update_transcript(id):
 
 
 @app.route('/openAudioStream', methods=['POST'])
-def open_audio_stream():
+async def open_audio_stream():
     # Insert a new transcript record with an empty transcript field
     try:
         cursor.execute(
@@ -101,7 +101,9 @@ def open_audio_stream():
         # start audio stream
         print("Creating Audio Stream")
         NewAudioStream = AudioStream(transcriptID)
-        NewAudioStream.start()
+        activeAudioStreams[transcriptID] = NewAudioStream
+        NewAudioStream.start_in_loop()
+
         print("Audio Stream created")
         return jsonify({"audioStreamID": transcriptID})
     except Exception as e:

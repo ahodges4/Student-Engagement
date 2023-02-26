@@ -4,10 +4,12 @@ import numpy as np
 import pyaudio
 import wave
 import functools
+import threading
 
 
 class AudioStream:
     def __init__(self, transcriptID):
+        self.loop = asyncio.get_event_loop()
         self.transcriptID = transcriptID
         self.buffer = []
         self.running = True
@@ -43,6 +45,7 @@ class AudioStream:
         print(self.transcript)
 
     async def audio_stream(self, websocket, path):
+        print("Audio Stream called")
         while self.running:
             print("Awaiting Data")
             audio_data = await websocket.recv()
@@ -63,8 +66,14 @@ class AudioStream:
                 self.buffer = []
 
     def start(self):
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
+        self.loop = asyncio.new_event_loop()
+
+        asyncio.set_event_loop(self.loop)
         start_server = websockets.serve(self.audio_stream, "localhost", 8000)
         asyncio.get_event_loop().run_until_complete(start_server)
+
         asyncio.get_event_loop().run_forever()
+
+    def start_in_loop(self):
+        audio_thread = threading.Thread(target=self.start)
+        audio_thread.start()
