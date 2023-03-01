@@ -73,7 +73,7 @@ class Question_Generator:
         # Extract the input text and maximum number of questions from the payload
         input = {
             "input_text": data.get("input_text"),
-            "question_count": data.get("question_count", 4)
+            "question_count": data.get("question_count", 8)
         }
 
         # Tokenize the input text into sentences
@@ -87,16 +87,16 @@ class Question_Generator:
         # Extract Nouns from the modified tex using the spaCy English Language model, the Sense2Vec model, and the Brown corpus frequency distribution
         Possible_Answers = Get_Possible_Answers(
             self.nlp, text, input["question_count"], self.s2v, self.freq_dist, self.normalized_levenshtein, len(sentences))
-
+        print(Possible_Answers)
         # Map each noun to a sentence containing that noun
         Possible_Answers_Sentance_Mapping = Find_Setences_With_Keyword(
             Possible_Answers, sentences)
-
+        print(Possible_Answers_Sentance_Mapping)
         # For each keyword, extract a snippet of text from the sentence containing that Noun
         for key in Possible_Answers_Sentance_Mapping.keys():
             snippet = " ".join(Possible_Answers_Sentance_Mapping[key][:3])
             Possible_Answers_Sentance_Mapping[key] = snippet
-
+        print(Possible_Answers_Sentance_Mapping)
         # Init output dictionary
         output = {}
 

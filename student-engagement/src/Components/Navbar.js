@@ -14,6 +14,11 @@ export default function Navbar(){
                         Start Recording
                     </button>
                 </Link>
+                <Link to="/QuestionGenerator">
+                    <button vairant="outlined">
+                        Question Generation
+                    </button>
+                </Link>
             </nav>
         </div>
     )

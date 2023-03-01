@@ -1,11 +1,11 @@
-import ReturnField from "../Components/ReturnField";
+import RecordingField from "../Components/RecordingField";
 
 
 function Recording() {
     
     return (
       <div className="Recording">
-        <ReturnField/>
+        <RecordingField/>
       </div>
     );
   }

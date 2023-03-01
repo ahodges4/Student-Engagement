@@ -50,7 +50,7 @@ export default function ReturnField(){
                         textarea.value = data.transcript;
                     })
                     .catch(error => {
-                        console.error(error);
+                        error.error(error);
                       });
                 }
 

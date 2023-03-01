@@ -350,7 +350,7 @@ def Get_Multi_Choice_Questions(sentence_Filtered_Keyword, processor, tokenizer, 
         # Populate individual question object
         question["question_statement"] = Question
         question["question_type"] = "MCQ"
-        question["answer"] = answer
+        question["answer"] = answer.title()
         question["id"] = i + 1
 
         # Get incorrect answers for the Question
