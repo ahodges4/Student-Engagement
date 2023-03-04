@@ -6,6 +6,7 @@ import Home from '../pages/Home'
 import RecordingSetup from '../pages/RecordingSetup';
 import Recording from '../pages/Recording';
 import QuestionGenerator from '../pages/QuestionGenerator';
+import LecturePlayback from '../pages/LecturePlayback';
 
 function Main() {
     return (
@@ -14,6 +15,7 @@ function Main() {
             <Route path = '/RecordingSetup' element={<RecordingSetup />}></Route>
             <Route path = '/Recording/:audioStreamID' element={<Recording />}></Route>
             <Route path = '/QuestionGenerator' element={<QuestionGenerator/>}></Route>
+            <Route path = '/Lectureplayback' element={<LecturePlayback/>}></Route>
         </Routes>
     );
 }
