@@ -1,38 +1,46 @@
 import React, {useState, useRef} from "react";
+import ReactPlayer from 'react-player';
 
 
 
 export default function VideoPlayer(){
-    const [isPlaying, setIsPlaying] = useState(false);
-    const videoRef = useRef(null);
     
+    const [currentTime, setCurrentTime] = useState(0);
+    const [duration, setDuration] = useState(0);
+    const playerRef = useRef(null);
+    const [isPlaying, setIsPlaying] = useState(false);
+
+    const handleProgress = (state) => {
+        setCurrentTime(state.playedSeconds);
+    }
+
+    const handleDuration = (duration) => {
+        setDuration(duration);
+    }
+
     const handlePlay = () => {
         setIsPlaying(true);
-        videoRef.current.play();
+        playerRef.current?.getInternalPlayer()?.playVideo();
     }
 
     const handlePause = () => {
         setIsPlaying(false);
-        videoRef.current.pause()
-    }
-
-    const handleTimeUpdate = () => {
-        console.log('Current time: ', videoRef.current.currentTime);
-        console.log('Duration: ', videoRef.current.duration);
+        playerRef.current?.getInternalPlayer()?.pauseVideo();
     }
     
     
     return (
         <div>
-            <video ref={videoRef} onTimeUpdate = {handleTimeUpdate} width = "640" height="360">
-                <source src = "https://player.vimeo.com/video/783455338?h=c3a102c9fe&title=0&byline=0&portrait=0" type="video/mp4"/>
-                <p>Your browser doesn't support HTML5 video.</p>
-            </video>
+            <ReactPlayer url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ" ref={playerRef} onProgress={handleProgress} onDuration={handleDuration} controls={true}/>
+            <div>CurrentTime: {currentTime}</div>
+            <div>Duration: {duration}</div>
+            <div>
             {isPlaying ? (
                 <button onClick={handlePause}>Pause</button>
-            ) : (
+                ) : (
                 <button onClick={handlePlay}>Play</button>
                 )}
+            </div>
         </div>
     );
 }
