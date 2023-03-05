@@ -262,3 +262,106 @@ nav li{
 
 
 /* Video Player Setup */
+
+
+.VideoPlayerSetup--Form input[type="text"],
+.VideoPlayerSetup--Form select {
+  width: 50%;
+  padding: 12px 20px;
+  margin: 8px 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+.VideoPlayerSetup--Form input[type="submit"] {
+  width: 30%;
+  background-color: #4CAF50;
+  color: white;
+  padding: 14px 20px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.VideoPlayerSetup--Form input[type="submit"]:hover {
+  background-color: #45a049;
+}
+
+.VideoPlayerSetup--Interval {
+  width: 50%;
+}
+
+.VideoPlayerSetup--Div {
+  border-radius: 5px;
+  margin: 30px auto;
+  max-width: 600px;
+  padding: 20px;
+  background-color: #CBE4DE;
+}
+
+.VideoPlayerSetup--Div h2 {
+  margin: 0;
+  margin-top: 5px;
+}
+
+.VideoPlayerSetup--IntervalContainer {
+    display: flex;
+    justify-content: center;
+  }
+  
+.VideoPlayerSetup--IntervalContainer > div {
+  display: flex;
+  align-items: center;
+}
+
+.VideoPlayerSetup--IntervalContainer > div > label {
+  margin-right: 10px;
+}
+
+
+/* Video Player */
+.VideoPlayer--VideoElement{
+    padding-top: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    position: relative;
+}
+
+.VideoPlayer--Controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 20px;
+    position: relative;
+    background-color: #CBE4DE;
+    padding: 5px;
+    border-radius: 10px;
+}
+
+.VideoPlayer--Controls img {
+    width: 40px;
+    height: 40px;
+    margin-right: 4px;
+}
+
+.VideoPlayer--VolumeButton{
+    margin-left: 20px;
+}
+
+.VideoPlayer--VolumeControl{
+    position: absolute;
+    top: -115px;
+    left: calc(50% - 70px);
+    background-color: #CBE4DE;
+    padding: 5px;
+    border-radius: 5px;
+    box-shadow: 0px 2px 5px grey ;
+    z-index: 1;
+    margin-left: 20px;
+    transform-origin: bottom;
+    transform: rotate(270deg);
+}
