@@ -37,35 +37,4 @@
   }
 }
 
-/* Transcript Table */
-.TranscriptsTable--Table {
-  border: 2px solid black;
-  border-collapse: collapse; 
-  font-size: 1rem;
-  margin-Bottom: 20px;
-  
-}
 
-.TranscriptsTable--Table th {
-  background-color: #f2f2f2;
-  color: #333333;
-  font-weight: bold;
-  padding: 12px 16px;
-  text-align: left;
-}
-
-.TranscriptsTable--Table td {
-  background-color: #ffffff;
-  border-bottom: 1px solid #dddddd;
-  color: #333333;
-  padding: 12px 16px;
-}
-
-.TranscriptsTable--SQButton {
-  margin-top: 20px;
-}
-
-.QuestionGrid--QuestionStatement{
-  overflow: hidden;
-  text-overflow: ellipsis;
-}

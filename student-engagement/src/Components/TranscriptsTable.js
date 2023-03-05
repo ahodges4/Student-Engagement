@@ -1,16 +1,14 @@
 import React, {useState, useEffect} from "react";
 import QuestionGrid from "./QuestionGrid";
 
-
 export default function TranscriptsTable(){
+    // Define state variables
     const [rows, setRows] = useState([]);
     const [Selected, setSelected] = useState();
-    const [showQuestions, setShowQeustions] = useState(false);
+    const [showQuestions, setShowQuestions] = useState(false);
     const [questionsData , setQuestionData] = useState(null);
 
-
-
-
+    // Fetch transcripts data from backend on component mount
     useEffect(() => {
         fetch(`http://127.0.0.1:5000/transcripts`)
         .then(response => response.json())
@@ -24,11 +22,12 @@ export default function TranscriptsTable(){
         });
     }, []);
     
-
+    // Handle radio button changes
     const handleRadioChange = (event) => {
         setSelected(Number(event.target.value));
     }
     
+    // Handle click event for generating questions
     const handleClick = () => {
         fetch(`http://127.0.0.1:5000/generateTranscriptQuestions/${document.querySelector('input[name="selectedRow"]:checked').value}`, {
              method: 'POST'
@@ -37,7 +36,7 @@ export default function TranscriptsTable(){
         .then(data => {
             console.log(data);
             if (Object.keys(data).length !== 0){
-                setShowQeustions(true);
+                setShowQuestions(true);
                 setQuestionData(data);
             }
         })
@@ -46,9 +45,10 @@ export default function TranscriptsTable(){
         })
     }
 
+    // Render the component
     return(
         
-        <div>
+        <div className="TranscriptsTable">
             {!showQuestions && (
                 <table className="TranscriptsTable--Table">
                     <thead>
@@ -72,12 +72,19 @@ export default function TranscriptsTable(){
                 </table>
             )}
             {!showQuestions && (
-                <div className="TranscriptsTable--SQButton">
-                    <button onClick={handleClick}>Generate Question for selected Transcript</button>
+                <div className="TranscriptsTable--SQButton--Div">
+                    <button onClick={handleClick} className="TranscriptsTable--SQButton"><span>Generate Questions for selected Transcript</span></button>
                 </div>
             )}
             {showQuestions && questionsData && (
-                <QuestionGrid questions={questionsData} />
+                <div>
+                    <div className="QuestionGrid--QuestionStatement--div-outer">
+                        <div className="QuestionGrid--QuestionStatement--div-inner">
+                            <span className="QuestionGrid--QuestionStatement" maxLength = "20">{questionsData.statement}</span>
+                        </div>
+                    </div>
+                    <QuestionGrid questions={questionsData} />
+                </div>
             )}
             
         </div>
