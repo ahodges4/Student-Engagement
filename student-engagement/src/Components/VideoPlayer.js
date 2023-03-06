@@ -10,18 +10,19 @@ import playIcon from "../icons/play.png";
 import pauseIcon from "../icons/pause.png";
 import nextIcon from "../icons/next.png";
 import volumeIcon from "../icons/volume.png";
-import fullscreenIcon from "../icons/fullscreen.png";
+
 
 // The VideoPlayer component accepts two props: transcripts and questionInterval
 export default function VideoPlayer(props) {
-    const { transcripts, questionInterval } = props;
+    const {lecture_data, transcripts} = props;
 
     // Define states to manage the current time, duration, playing status, next question, current transcript, question data, and whether to show the questions
+    const [questionInterval, setQuestionInterval] = useState(null);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const playerRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [nextQuestion, setNextQuestion] = useState(questionInterval);
+    const [nextQuestion, setNextQuestion] = useState();
     const [currentTranscript, setCurrentTranscript] = useState(0);
     const [showQuestions, setShowQuestions] = useState(false);
     const [questionData, setQuestionData] = useState(null);
@@ -62,7 +63,15 @@ export default function VideoPlayer(props) {
 
     // This function is called when the video's duration is available
     const handleDuration = (duration) => {
+        console.log("Duration");
+        if (questionInterval === null){
+            const questionIntervalTemp = duration/(transcripts.length+1);
+            setQuestionInterval(questionIntervalTemp);
+            setNextQuestion(questionIntervalTemp);
+        }
+        
         setDuration(duration);
+        
     }
 
     // These functions are called when the user clicks the play or pause button
@@ -97,6 +106,7 @@ export default function VideoPlayer(props) {
     }
 
     const handleGoToNextInterval = () => {
+        console.log(nextQuestion);
         playerRef.current?.seekTo(nextQuestion);
     }
 
@@ -112,12 +122,12 @@ export default function VideoPlayer(props) {
             {!showQuestions && (
                 <div className="VideoPlayer--VideoElement">
                     <ReactPlayer
-                        url="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                        url={lecture_data.lecture_url}
                         ref={playerRef}
                         onReady={resumeVideo}
                         onProgress={handleProgress}
                         onDuration={handleDuration}
-                        controls={false}
+                        controls={true}
                         playing={isPlaying}
                         volume={volume}
                         onPlay={() => setIsPlaying(true)}

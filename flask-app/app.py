@@ -185,5 +185,81 @@ def generate_questions_from_transcripts(id):
         return jsonify({'error': 'Failed to create questions of transcript : ' + str(e)})
 
 
+@app.route('/lectures', methods=['GET'])
+def get_lectures():
+    cursor.execute("SELECT * FROM lectures")
+    lectures = cursor.fetchall()
+    return jsonify(lectures)
+
+
+@app.route('/lectures/<id>', methods=['GET'])
+def get_lecture(id):
+    cursor.execute("SELECT * FROM lectures WHERE id = %s", (id,))
+    result = cursor.fetchone()
+
+    if result:
+        return jsonify(result)
+    else:
+        return jsonify({'error': 'Lecture not found'})
+
+
+@app.route('/lectures', methods=['POST'])
+def create_lecture():
+    try:
+        lecture_url = request.get_json()['lecture_url']
+        lecture_title = request.get_json()['lecture_title']
+    except:
+        return jsonify({'error': 'Failed to create lecture'})
+    # Execute the INSERT query
+    try:
+        cursor.execute(
+            "INSERT INTO lectures (lecture_url, lecture_title) VALUES (%s,%s)", (lecture_url, lecture_title))
+        conn.commit()
+        return jsonify({'message': 'Lecture created successfully'})
+    except:
+        return jsonify({'error': 'Failed to create lecture'})
+
+
+@app.route('/lecture_transcripts', methods=['GET'])
+def get_lecture_transcripts():
+    cursor.execute("SELECT * FROM lecture_transcripts")
+    lecture_transcripts = cursor.fetchall()
+    return jsonify(lecture_transcripts)
+
+
+@app.route('/lecture_transcripts/<id>', methods=['GET'])
+def get_transcript_IDs_from_Lecture_ID(id):
+    cursor.execute(
+        "SELECT * FROM lecture_transcripts WHERE lecture_id = %s", (id,))
+    result = cursor.fetchall()
+
+    if result:
+        return jsonify(result)
+    else:
+        return jsonify({'error': 'Lecture IDs not found'})
+
+
+@app.route('/lecture_transcripts', methods=['POST'])
+def create_lecture_transcript():
+    try:
+        transcript_ids = request.get_json()["transcript_ids"]
+        lecture_id = request.get_json()["lecture_id"]
+    except:
+        return jsonify({'error': 'Failed to create lecture_transcripts'})
+
+    if isinstance(transcript_ids, int):
+        cursor.execute(
+            "INSERT INTO lecture_transcripts (lecture_id, transcript_id) VALUES (%s, %s)", (lecture_id, transcript_ids))
+        conn.commit()
+    elif isinstance(transcript_ids, list):
+        for transcript_id in transcript_ids:
+            cursor.execute(
+                "INSERT INTO lecture_transcripts (lecture_id, transcript_id) VALUES (%s, %s)", (lecture_id, transcript_id))
+            conn.commit()
+    else:
+        return jsonify({'error': 'Failed to create lecture_transcripts. transcript_ids is not a number or list'})
+    return jsonify({'message': 'Lecture_transcript created successfully'})
+
+
 if __name__ == '__main__':
     app.run()
