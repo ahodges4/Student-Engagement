@@ -161,7 +161,7 @@ export default function VideoPlayer(props) {
             {showQuestions && questionData && (
                 <div>
                     <QuestionGrid questions={questionData} />
-                    <button onClick={handleQuestionContinue}>Continue</button>
+                    <button className="VideoPlayer--QuestionsContinueButton" onClick={handleQuestionContinue}>Continue</button>
                 </div>
             )}
         </div>
