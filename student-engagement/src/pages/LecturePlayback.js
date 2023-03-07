@@ -2,7 +2,7 @@ import React, { useState } from "react"
 
 // This imports the VideoPlayer and VideoPlayerSetup components from their respective files
 import VideoPlayer from "../Components/VideoPlayer"
-import VideoPlayerSetup from "../Components/VideoPlayerSetup";
+
 import LectureTable from "../Components/LectureTable";
 
 // This function component is the main component for playing back a lecture

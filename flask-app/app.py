@@ -8,6 +8,7 @@ from audioStream import AudioStream
 from question_generation.main import Question_Generator
 import asyncio
 import traceback
+import socket
 
 app = Flask(__name__)
 
@@ -95,6 +96,43 @@ def update_transcript(id):
         return jsonify({'error': 'Failed to update transcript'})
 
 
+@app.route('/transcripts/<id>', methods=['DELETE'])
+def deleteTranscript(id):
+    try:
+        conn.begin()
+    except:
+        return jsonify({"error": "Delete Transcript: Could not start transaction"})
+
+    try:
+        lecture_id = int(id)
+    except ValueError:
+        conn.rollback()
+        return jsonify({"error": "Could not delete Transcript: ID is not a valid integer"})
+
+    try:
+        cursor.execute(
+            "DELETE FROM transcripts WHERE id = %s", (id,))
+        cursor.execute(
+            "DELETE FROM lecture_transcripts WHERE transcript_id = %s", (id,))
+        conn.commit()
+        return jsonify({"message": "Transcript deleted successfully"})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": "Could not delete transcript: {}".format(str(e))})
+
+
+def get_next_available_port(start_port):
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    port = start_port
+    while True:
+        try:
+            sock.bind(("localhost", port))
+            sock.close()
+            return port
+        except OSError:
+            port += 1
+
+
 @app.route('/openAudioStream', methods=['POST'])
 async def open_audio_stream():
     # Insert a new transcript record with an empty transcript field
@@ -108,37 +146,36 @@ async def open_audio_stream():
 
         # start audio stream
         print("Creating Audio Stream")
-        NewAudioStream = AudioStream(transcriptID)
+        port = get_next_available_port(8000)
+        print("On port: " + str(port))
+        NewAudioStream = AudioStream(transcriptID, port)
         activeAudioStreams[transcriptID] = NewAudioStream
         NewAudioStream.start_in_loop()
 
         print("Audio Stream created")
-        return jsonify({"audioStreamID": transcriptID})
+        return jsonify({"audioStreamID": transcriptID, "port": port})
     except Exception as e:
         tb = traceback.format_exc()
         print(f"Error: {e}\n{tb}")
         return jsonify({'error': 'Failed to create audio stream : ' + str(e)})
 
 
-@app.route('/closeAudioStream/<id>', methods=['POST'])
-def closeAudioStream(id):
-    # print(activeAudioStreams)
-
+@app.route('/stopAudioStream/<int:audioStreamID>', methods=['POST'])
+async def stop_audio_stream(audioStreamID):
     try:
-        activeAudioStreams[id].running = False
-        del activeAudioStreams[id]
-        return jsonify({"200": "OK"})
-    except Exception as e:
-        print(e)
-        return jsonify({"Error : ": str(e)})
+        # get the audio stream for the specified ID
+        audioStream = activeAudioStreams.get(audioStreamID)
 
-# @app.route('/closeAudioStream/<id>', methods=['GET'])
-# def close_audio_stream(id):
-#     if id in activeAudioStreams:
-#         del activeAudioStreams[id]
-#         return jsonify({"message": "Instance with ID {} closed successfully".format(id)})
-#     else:
-#         return jsonify({"error": "Instance with ID {} not found".format(id)})
+        # stop the audio stream
+        if audioStream is not None:
+            audioStream.stop()
+            del activeAudioStreams[audioStreamID]
+
+        return jsonify({'success': True})
+    except Exception as e:
+        tb = traceback.format_exc()
+        print(f"Error: {e}\n{tb}")
+        return jsonify({'error': 'Failed to stop audio stream : ' + str(e)})
 
 
 @app.route('/getCurrentTranscript/<id>', methods=['GET'])
@@ -255,10 +292,118 @@ def create_lecture_transcript():
         for transcript_id in transcript_ids:
             cursor.execute(
                 "INSERT INTO lecture_transcripts (lecture_id, transcript_id) VALUES (%s, %s)", (lecture_id, transcript_id))
-            conn.commit()
+        conn.commit()
     else:
         return jsonify({'error': 'Failed to create lecture_transcripts. transcript_ids is not a number or list'})
     return jsonify({'message': 'Lecture_transcript created successfully'})
+
+
+@app.route('/changeLectureRecording', methods=['PUT'])
+def updateLectureRecording():
+    try:
+        conn.begin()
+        lectureID = request.get_json()["lecture_id"]
+        lectureTitle = request.get_json()["lecture_title"]
+        lectureURL = request.get_json()["lecture_url"]
+        transcriptIDs = request.get_json()["transcript_ids"]
+    except Exception as e:
+        conn.rollback()
+        return jsonify({'error': "Failed to update Lecture Recording {}".format(str(e))})
+
+    # Delete all current relationships
+    try:
+        cursor.execute(
+            "DELETE FROM lecture_transcripts WHERE lecture_id = %s", (lectureID,))
+
+    except:
+        conn.rollback()
+        return jsonify({"error": "Could not delete existing relationships"})
+
+    # Update existing lecture information
+    try:
+        cursor.execute("UPDATE lectures SET lecture_url = %s, lecture_title = %s WHERE id = %s",
+                       (lectureURL, lectureTitle, lectureID))
+
+    except:
+        conn.rollback()
+        return jsonify({"error": "Could not update existing lecture information"})
+
+    # Make new relationships
+    try:
+        if isinstance(transcriptIDs, int):
+            cursor.execute(
+                "INSERT INTO lecture_transcripts (lecture_id, transcript_id) VALUES (%s, %s)", (lectureID, transcriptIDs))
+
+        elif isinstance(transcriptIDs, list):
+            for transcript_id in transcriptIDs:
+                cursor.execute(
+                    "INSERT INTO lecture_transcripts (lecture_id, transcript_id) VALUES (%s, %s)", (lectureID, transcript_id))
+
+        else:
+            conn.rollback()
+            return jsonify({'error': 'Failed to create lecture_transcripts. transcript_ids is not a number or list'})
+
+    except:
+        conn.rollback()
+        return jsonify({"error": "Could not create new relationships"})
+
+    conn.commit()
+    return jsonify({"message": "Lecture updated successfully"})
+
+
+@app.route('/lectures/<id>', methods=['DELETE'])
+def deleteLecture(id):
+    try:
+        conn.begin()
+    except:
+        return jsonify({"error": "Delete Lecture: Could not start transaction"})
+
+    try:
+        lecture_id = int(id)
+    except ValueError:
+        conn.rollback()
+        return jsonify({"error": "Could not delete lecture: ID is not a valid integer"})
+
+    try:
+        cursor.execute(
+            "DELETE FROM lecture_transcripts WHERE lecture_id = %s", (id,))
+        cursor.execute("DELETE FROM lectures WHERE id = %s", (id,))
+        conn.commit()
+        return jsonify({"message": "Lecture deleted successfully"})
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": "Could not delete lecture: {}".format(str(e))})
+
+
+@app.route('/newLecture', methods=['POST'])
+def createNewLecture():
+    try:
+        conn.begin()
+        lectureTitle = request.get_json()["lecture_title"]
+        lectureURL = request.get_json()["lecture_url"]
+        transcriptIDs = request.get_json()["transcript_ids"]
+
+        cursor.execute(
+            "INSERT INTO lectures (lecture_url, lecture_title) VALUES (%s,%s)", (lectureURL, lectureTitle))
+        lectureID = cursor.lastrowid
+
+        if isinstance(transcriptIDs, int):
+            cursor.execute(
+                "INSERT INTO lecture_transcripts (lecture_id, transcript_id) VALUES (%s, %s)", (lectureID, transcriptIDs))
+        elif isinstance(transcriptIDs, list):
+            for transcript_id in transcriptIDs:
+                cursor.execute(
+                    "INSERT INTO lecture_transcripts (lecture_id, transcript_id) VALUES (%s, %s)", (lectureID, transcript_id))
+        else:
+            conn.rollback()
+            return jsonify({'error': 'Failed to create lecture_transcripts. transcript_ids is not a number or list'})
+
+        conn.commit()
+        return jsonify({"message": "New lecture created successfully"})
+
+    except Exception as e:
+        conn.rollback()
+        return jsonify({"error": "New Lecture: Failed to create new lecture. Error message: {}".format(str(e))})
 
 
 if __name__ == '__main__':

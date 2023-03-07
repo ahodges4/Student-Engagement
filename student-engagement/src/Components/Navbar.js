@@ -12,12 +12,12 @@ export default function Navbar(){
     }
 
     return (
-        <header>
+        <header className='header'>
             <div className="nav--container">
                 <Link to="/" className="nav--logo">
                     <img src={logo} alt="Logo" className="nav--logo"/>
                 </Link>
-                <nav>
+                <nav className='nav'>
                     <ul>
                         <li>
                             <Link to="/" className='nav--Link' onClick={(e) => handleLinkClick(e, '/')}>
@@ -25,8 +25,8 @@ export default function Navbar(){
                             </Link>
                         </li>
                         <li>
-                            <Link to="/recordingSetup" className='nav--Link' onClick={(e) => handleLinkClick(e, '/recordingSetup')}>
-                                Start Recording
+                            <Link to="/Transcripts" className='nav--Link' onClick={(e) => handleLinkClick(e, '/Transcripts')}>
+                                Transcripts
                             </Link>
                         </li>
                         <li>

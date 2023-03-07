@@ -5,30 +5,30 @@ body {
     font-weight: 400;
 }
 
-header{
+.header{
     background: #2E4F4F;
     
 }
 
-header::after {
+.header::after {
     content: '';
     display:table;
     clear:both;
 }
 
 
-nav{
+.nav{
     float:right;
     height: 70px;
 }
 
-nav ul{
+.nav ul{
     margin: 0;
     padding: 0;
     list-style: none;
 }
 
-nav li{
+.nav li{
     display: inline-block;
     margin-left: 60px;
     padding-top: 28px;
@@ -39,6 +39,7 @@ nav li{
     color: #CBE4DE;
     text-decoration: none;
     text-transform: uppercase;
+    cursor: pointer;
 }
 
 .nav--Link:hover{
@@ -82,12 +83,31 @@ nav li{
     height: 50px;
 }
 
+
+
+
+
+
+
+/* Create Transcript */
+
+.CreateTranscript--SubHeader{
+    background-color: #3c6868;
+}
+
+
+
+
+
 /* Recording Field */
 .ReturnField--transcript{
-    border: 1px solid black;
+    border: 2px solid black;
+    border-radius: 5px;
+    background-color: #CBE4DE;
     width: 50%;
     height: 100%;
     padding: 10px;
+    margin: 10px 10px;
 }
 
 .ReturnField--button{
@@ -105,10 +125,43 @@ nav li{
     
 }
 
-.ReturnField--button:hover{
-    border: 2px solid rgb(221, 221, 221);
-    box-shadow: 0px 1px 5px rgba(0,0,0,0.1);
+
+
+
+.ReturnField--button {
+    width: 30%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 20px 35%;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
 }
+
+.ReturnField--button:hover{
+    background-color: #45a049;
+}
+
+.ReturnField--Stopbutton {
+    width: 30%;
+    background-color: #ff0000;
+    color: white;
+    padding: 14px 20px;
+    margin: 20px 35%;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.ReturnField--Stopbutton:hover{
+    background-color: #aa0101;
+}
+
+
+
+
+
+
 
 /* Transcript Table */
 .TranscriptsTable--Table {
@@ -193,7 +246,6 @@ nav li{
     padding: 20px 10px;
 }
 
-/* Question Grid */
 
 .QuestionGrid{
     display: inline-grid;
@@ -321,7 +373,7 @@ nav li{
 }
 
 .LectureTable{
-    padding-top: 5px;
+    padding-top: 20px;
 }
 
 .LectureTable--Table th {
@@ -352,3 +404,267 @@ nav li{
 .LectureTable button:hover {
     background-color: #45a049;
 }
+
+.LectureTable--Edit, .LectureTable--Delete {
+    max-height: 30px;
+    margin: 0;
+    padding: 0;
+    cursor: pointer;
+
+}
+
+
+
+
+.LectureTable--AddIcon{
+    max-height: 25px;
+    cursor: pointer;
+    border: 6px solid #CBE4DE;
+    border-radius: 50%;
+    background-color: #CBE4DE;
+}
+
+
+
+
+
+
+
+/* Edit Window */
+.EditWindow{
+    min-height: 600px;
+}
+.EditWindow--Form {
+    margin: 15px 50px;
+    display: flex;
+    flex-direction: column;
+    
+    padding: 5px;
+}
+  
+.EditWindow--Form input[type="text"],
+.EditWindow--Form select {
+    width: 50%;
+    padding: 12px 20px;
+    margin: 8px 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.EditWindow--Form input[type="text"].valid {
+    border-color: green;
+}
+
+.EditWindow--Form input[type="text"].invalid {
+    border-color: red;
+}
+
+.CloseButton {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    height: 40px;
+}
+  
+
+
+  
+.EditWindow--Form button[type="submit"] {
+    width: 30%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 20px 35%;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.EditWindow--Form textarea {
+    height: 500px;
+    width: 100%;
+}
+
+.EditWindow--Form textarea.valid {
+    border-color: green;
+}
+
+.EditWindow--Form textarea.invalid {
+    border-color: red;
+}
+  
+.EditWindow--Form input[type="submit"]:hover {
+    background-color: #45a049;
+}
+
+.EditWindow--Div {
+    border-radius: 5px;
+    margin: 30px auto;
+    max-width: 600px;
+    padding: 20px;
+    background-color: #CBE4DE;
+}
+
+
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: auto;
+}
+
+.modal {
+    position: absolute;
+    z-index: 10000;
+    background-color: #CBE4DE;
+    border-radius: 15px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    width: 80%;
+    top: 5%;
+    overflow: auto;
+    padding: 20px;
+}
+
+
+
+
+/* Edit Window transcript table */
+.EditWindow--TranscriptsTable--Table {
+    border-collapse: collapse; 
+    font-size: 1rem;
+    margin-Bottom: 20px;
+    width: 80%;
+    margin-left: 10%;
+    margin-right: 10%;
+    border: 3px solid #0E8388;
+}
+
+.EditWindow--TranscriptsTable{
+    padding-top: 5px;
+    
+}
+
+.EditWindow--TranscriptsTable--Table th {
+    background-color: #0E8388;
+    color: #333333;
+    font-weight: bold;
+    padding: 12px 16px;
+    text-align: left;
+}
+
+.EditWindow--TranscriptsTable--Table td {
+    background-color: #CBE4DE;
+    border-bottom: 2px solid #5c5a5a;
+    color: #333333;
+    padding: 12px 16px;
+}
+
+.EditWindow--Form textarea {
+    resize: vertical;
+}
+
+
+
+
+
+
+/* Add Transcript */
+.AddTranscript--RecordAudio {
+    width: 30%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 20px 35%;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.AddTranscript--RecordAudio:hover{
+    background-color: #45a049;
+}
+
+
+
+
+
+
+/* Transcript Sub Header */
+
+.subHeader{
+    background: #2E4F4F;
+    width: 30%;
+    margin: 0px 35%;
+    border-radius: 50px;
+    
+}
+
+.subHeader::after {
+    content: '';
+    display:table;
+    clear:both;
+}
+
+.subNav{
+    height: 70px;
+}
+
+.subNav ul{
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.subNav li{
+    display: inline-block;
+    margin: 0 30px;
+    padding-top: 28px;
+    position: relative;
+}
+
+.subNav--Link{
+    color: #CBE4DE;
+    text-decoration: none;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+.subNav--Link:hover{
+    color: #707e7a;
+}
+
+.subNav--Link::before{
+    content: '';
+    display: block;
+    height: 5px;
+    
+    background-color: #58615e;
+
+    position: absolute;
+    top: 0;
+    width: 0%;
+
+    transition: all ease-in-out 250ms;
+}
+
+.subNav--Link:hover::before{
+    width: 100%;
+}
+
+.subNav--container{
+    width:80%;
+    margin: 0 auto;
+}  
+
