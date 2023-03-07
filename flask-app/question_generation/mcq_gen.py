@@ -111,11 +111,11 @@ def Get_Sentences(text):
     sentences = [y for x in sentences for y in x]
     # Remove any sentence that has a length of less than 20
     sentences = [sentence.strip()
-                 for sentence in sentences if len(sentence) > 20]
+                 for sentence in sentences if len(sentence) > 10]
 
     return sentences
 
-# Get sentences that contain the list of sentences for each keyword
+# Get sentences that contain the keywords
 
 
 def Find_Setences_With_Keyword(keywords, sentences):
@@ -194,8 +194,8 @@ def filter_phrases(phrases, max, normalized_levenshtein):
 # Get a list of important nouns and proper nouns in the text
 
 
-def Get_Nouns(text):
-    nouns = []
+def Get_POS(text):
+    POS = []
 
     # Initialize the MultipartiteRank extractor
     extractor = pke.unsupervised.MultipartiteRank()
@@ -204,7 +204,7 @@ def Get_Nouns(text):
     extractor.load_document(input=text, language="en")
 
     # Set the part-of-speech tags to extract candidates from
-    pos = {"PROPN", "Noun"}
+    pos = {"PROPN", "NOUN_PROP", "ADJ", "ADV", "VERB", "NUM"}
 
     # Define a list, which contains punctuation and English stopwords
     stoplist = list(string.punctuation) + stopwords.words("english")
@@ -215,18 +215,18 @@ def Get_Nouns(text):
     # Weight the candidate keyphrases using MultipartiteRank with specified alpha and threshold parameters
     try:
         extractor.candidate_weighting(
-            alpha=1.1, threshold=0.75, method="average")
+            alpha=1.2, threshold=0.75, method="average")
     except:
-        return nouns
+        return POS
 
     # Get the n best candidate keyphrases
     keyphrases = extractor.get_n_best(n=10)
 
     # Extract the keyphrases from the returned tuple and append them to the output
     for k in keyphrases:
-        nouns.append(k[0])
+        POS.append(k[0])
 
-    return nouns
+    return POS
 
 # Get a list of the top 50 longest phrases that occur more than once in the text
 
@@ -276,7 +276,7 @@ def Get_Possible_Answers(nlp, text, keywords_limit, s2v, freq_dist, normalized_l
     keywords_limit = int(keywords_limit)
 
     # Get key Nouns using MultipartiteRank algorithm and sort them by their frequency
-    Nouns = Get_Nouns(text)
+    Nouns = Get_POS(text)
     Nouns = sorted(Nouns, key=lambda x: freq_dist[x])
 
     # Filter out phrases that are too similar and keep only the top max_keywords

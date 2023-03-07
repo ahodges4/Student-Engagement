@@ -69,7 +69,10 @@ def create_transcript():
         cursor.execute(
             "INSERT INTO transcripts (transcript) VALUES (%s)", (transcript,))
         conn.commit()
-        return jsonify({'message': 'Transcript created successfully'})
+
+        transcriptID = cursor.lastrowid
+
+        return jsonify({'transcript_id': transcriptID})
     except:
         return jsonify({'error': 'Failed to create transcript'})
 

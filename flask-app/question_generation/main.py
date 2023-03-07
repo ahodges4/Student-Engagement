@@ -84,7 +84,7 @@ class Question_Generator:
         spacer = " "
         text = spacer.join(sentences)
 
-        # Extract Nouns from the modified tex using the spaCy English Language model, the Sense2Vec model, and the Brown corpus frequency distribution
+        # Extract Nouns from the modified text using the spaCy English Language model, the Sense2Vec model, and the Brown corpus frequency distribution
         Possible_Answers = Get_Possible_Answers(
             self.nlp, text, input["question_count"], self.s2v, self.freq_dist, self.normalized_levenshtein, len(sentences))
         print(Possible_Answers)
