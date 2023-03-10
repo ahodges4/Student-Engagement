@@ -1,11 +1,8 @@
 import asyncio
-import sys
 import websockets
 from websockets import server
 import numpy as np
-import pyaudio
 import wave
-import functools
 import threading
 import requests
 

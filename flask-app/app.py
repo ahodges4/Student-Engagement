@@ -1,5 +1,4 @@
-import os
-import sys
+
 from flask_cors import CORS, cross_origin
 import pymysql
 from flaskext.mysql import MySQL
@@ -9,8 +8,17 @@ from question_generation.main import Question_Generator
 import asyncio
 import traceback
 import socket
+from dotenv import load_dotenv
+import os
+
 
 app = Flask(__name__)
+
+load_dotenv()
+
+db_host = os.environ.get("DB_HOST")
+db_user = os.environ.get("DB_USER")
+db_password = os.environ.get("DB_PASSWORD")
 
 activeAudioStreams = {}
 
@@ -21,9 +29,9 @@ CORS(app)
 
 # Connect to the database
 conn = pymysql.connect(
-    host='localhost',
-    user='root',
-    password='bestHand',
+    host=db_host,
+    user=db_user,
+    password=db_password,
     db="student-engagement",
     charset='utf8mb4',
     cursorclass=pymysql.cursors.DictCursor
