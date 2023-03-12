@@ -134,13 +134,13 @@ export default function TranscriptsTable(props){
                     <tbody>
                         {rows.map((obj) =>(
                             <tr key={obj.id}>
-                                {showButton && (<td>
+                                {showButton && (<td className="TranscriptTable--Cell">
                                     <input type="radio" name="selectedRow" value={obj.id} checked = {obj.id === Selected} onChange={handleRadioChange}/>
                                 </td>)}
-                                <td>{obj.id}</td>
-                                <td>{obj.transcript}</td>
-                                <td><img className="LectureTable--Edit" src = {editIcon} alt="edit" onClick={() => handleEdit(obj)}/></td>
-                                <td><img className="LectureTable--Delete" src = {lastDelete===obj.id ? tickIcon : deleteIcon} alt="delete" onClick={() => handleDelete(obj.id)}/></td>
+                                <td className="TranscriptTable--Cell">{obj.id}</td>
+                                <td className="TranscriptTable--Cell"><div className="TranscriptTable--Transcript">{obj.transcript}</div></td>
+                                <td className="TranscriptTable--Cell"><img className="LectureTable--Edit" src = {editIcon} alt="edit" onClick={() => handleEdit(obj)}/></td>
+                                <td className="TranscriptTable--Cell"><img className="LectureTable--Delete" src = {lastDelete===obj.id ? tickIcon : deleteIcon} alt="delete" onClick={() => handleDelete(obj.id)}/></td>
                             </tr>
                         ))}
                     </tbody>

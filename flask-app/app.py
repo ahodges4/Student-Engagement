@@ -1,4 +1,5 @@
 
+import wave
 from flask_cors import CORS, cross_origin
 import pymysql
 from flaskext.mysql import MySQL
@@ -10,6 +11,10 @@ import traceback
 import socket
 from dotenv import load_dotenv
 import os
+from pydub import AudioSegment
+
+
+cwd = os.getcwd()
 
 
 app = Flask(__name__)
@@ -187,6 +192,82 @@ async def stop_audio_stream(audioStreamID):
         tb = traceback.format_exc()
         print(f"Error: {e}\n{tb}")
         return jsonify({'error': 'Failed to stop audio stream : ' + str(e)})
+
+
+def split_audio(file_path):
+    # Load the MP4 file using PyDub
+    audio = AudioSegment.from_file(file_path, "mp4")
+
+    # Get the file name
+    file_name = os.path.splitext(os.path.basename(file_path))[0]
+
+    # Create new folder for WAV files
+    new_folder_path = os.path.join(os.path.dirname(file_path), file_name)
+    os.mkdir(new_folder_path)
+
+    # Calculate the duration of the audio file in ms
+    duration = len(audio)
+
+    # Split the audio into 1-min chunks
+    chunk_size = 59 * 1000  # 59 sec in ms
+    chunks = list(range(0, duration, chunk_size))
+    if chunks[-1] != duration:
+        chunks.append(duration)
+
+    # Save each chunk as a separate WAV file
+    wav_files = []
+    for i in range(len(chunks) - 1):
+        start = chunks[i]
+        end = chunks[i+1]
+        chunk = audio[start:end]
+        filename = os.path.join(new_folder_path, f"chunk{i+1}.wav")
+        chunk.export(filename, format="wav", parameters=["-ar", "16000"])
+        print(get_audio_length(filename))
+        print(f"Saved chunk {i+1} as {filename}")
+        wav_files.append(filename)
+
+    # Return the list of WAV file paths
+    return wav_files
+
+
+def get_audio_length(filepath):
+    with wave.open(filepath, 'r') as wav:
+        frames = wav.getnframes()
+        rate = wav.getframerate()
+        duration = frames / float(rate)
+    return duration
+
+
+@app.route('/generateTranscriptFromFile', methods=['POST'])
+async def generate_transcript_from_file():
+
+    cursor.execute(
+        "INSERT INTO transcripts (transcript) VALUES (null)")
+    conn.commit()
+
+    # get the ID of the newly created record
+    transcriptID = cursor.lastrowid
+
+    NewAudioStream = AudioStream(transcriptID, 0)
+
+    if 'file' not in request.files:
+        return 'No file found in request'
+
+    file = request.files['file']
+    if file.filename == '':
+        return 'No file selected'
+
+    file_path = cwd + '/uploadedVideos/' + file.filename
+
+    # Save the file to disk
+    file.save(file_path)
+
+    wav_files = split_audio(file_path)
+
+    for wav_file in wav_files:
+        NewAudioStream.transcribe_file(wav_file)
+
+    return jsonify({"transcript_id": "{}".format(transcriptID)})
 
 
 @app.route('/getCurrentTranscript/<id>', methods=['GET'])

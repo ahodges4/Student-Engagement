@@ -2,6 +2,7 @@ import React, {useState} from "react";
 import {useNavigate } from "react-router-dom";
 
 import closeIcon from "../../icons/close.png"
+import FileTranscript from "./FileTranscript";
 
 export default function AddTranscript(props){
 
@@ -9,6 +10,7 @@ export default function AddTranscript(props){
     const [transcript, setTranscript] = useState("");
     const [isTranscriptValid, setIsTranscriptValid] = useState(false);
     const [isManual, setIsManual] = useState(true);
+    const [videoSelected, setVideoSelected] = useState(false);
 
     // Destructuring props to access functions passed down from the parent component
     const {setShowAddWindow, updateTable} = props;
@@ -91,6 +93,7 @@ export default function AddTranscript(props){
         });
     }
 
+
     // Return the JSX for the AddTranscript component
     return (
         <div className="modal-overlay">
@@ -118,6 +121,8 @@ export default function AddTranscript(props){
                     {!isManual && (
                         <div>
                             <button className="AddTranscript--RecordAudio" onClick={openAudioStream}>Start Recording Speech</button>
+                            OR 
+                            <FileTranscript/>
                         </div>
                     )}
                 </div>

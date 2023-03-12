@@ -74,7 +74,7 @@ export default function TranscriptsTable(props) {
                                 <input type="checkbox" name="selectedRows" value={obj.id} checked = {selected.includes(obj.id)} onChange={handleCheckboxChange}/>
                             </td>
                             <td>{obj.id}</td>
-                            <td>{obj.transcript}</td>
+                            <td> <div className="TranscriptTable--Transcript">{obj.transcript}</div></td>
                         </tr>
                     ))}
                 </tbody>

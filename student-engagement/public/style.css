@@ -188,20 +188,26 @@ body {
     text-align: left;
 }
 
-.TranscriptsTable--Table td {
-  background-color: #CBE4DE;
-  border-bottom: 2px solid #5c5a5a;
-  color: #333333;
-  padding: 12px 16px;
+.TranscriptTable--Cell {
+    background-color: #CBE4DE;
+    border-bottom: 2px solid #5c5a5a;
+    color: #333333;
+    padding: 12px 16px;
 }
+
+.TranscriptTable--Transcript {
+    max-height: 200px !important;
+    overflow-y: auto !important;
+    background-color: #CBE4DE;
+    color: #333333;
+    padding: 12px 16px;
+}
+
 
 .TranscriptsTable--SQButton--Div {
     margin-top: 20px;
     padding-bottom: 20px;
     height: 50px;
-  
-  
-  
 }
 
 .TranscriptsTable--SQButton{
@@ -222,6 +228,9 @@ body {
 .TranscriptsTable--SQButton:active{
     background-color: #006e58;
 }
+
+
+
 
 
 /* Question Grid */
@@ -403,6 +412,26 @@ body {
     color: #333333;
     padding: 12px 16px;
 }
+
+.LectureTable--Table tr {
+    padding: 0;
+    margin: 0;
+    border-collapse: collapse;
+}
+
+.LectureTable--URL {
+    display: flex;
+    align-items: center;
+}
+
+.LectureTable--URL img {
+    width: 480px;
+    height: 270px;
+    margin-left: 10px;
+    object-fit: cover;
+    object-position: center center;
+}
+
 
 .LectureTable button {
     width: 30%;
@@ -681,3 +710,27 @@ body {
     margin: 0 auto;
 }  
 
+
+/* Video File Transcript  */
+.FileTranscript--Div input {
+    width: auto;
+    height: auto;
+    padding: 2px 2px;
+    margin-top: 20px;
+    border: 2px solid #f8f9fa;
+    border-radius: 10px;
+    color: #3c4043;
+    background-color: #f8f9fa;
+    cursor: pointer;
+}
+
+.FileTranscript--Div button[type="submit"] {
+    width: 30%;
+    background-color: #4CAF50;
+    color: white;
+    padding: 14px 20px;
+    margin: 20px 35%;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}

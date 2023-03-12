@@ -119,6 +119,11 @@ export default function LectureTable(props){
         
     }
 
+    const handleThumbnail = (url) => {
+        const videoId = url.split('v=')[1]
+        return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+    }
+
     
 
     
@@ -145,7 +150,7 @@ export default function LectureTable(props){
                             <input type="radio" name="selectedRow" value={obj.id} checked = {obj.id === Selected} onChange={handleRadioChange}/>
                             </td>
                             <td>{obj.lecture_title}</td>
-                            <td>{obj.lecture_url}</td>
+                            <td className="LectureTable--URL">{obj.lecture_url}<img src = {handleThumbnail(obj.lecture_url)}></img></td>
                             <td>{lectureTranscripts[obj.id]?.join(', ')}</td>
                             <td><img className="LectureTable--Edit" src = {editIcon} alt="edit" onClick={() => handleEdit(obj)}/></td>
                             <td><img className="LectureTable--Delete" src = {lastDelete===obj.id ? tickIcon : deleteIcon} alt="delete" onClick={() => handleDelete(obj.id)}/></td>
