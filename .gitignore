@@ -3,5 +3,6 @@ flask-app/question_generation/._s2v_old/
 *.wav
 venv
 flask-app/uploadedVideos/*
-flask-app/.env
+C:\Users\Monke\Documents\GitHub\Student-Engagement\flask-app\.env
 
+flask-app/.env
