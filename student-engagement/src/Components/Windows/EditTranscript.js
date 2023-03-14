@@ -6,6 +6,7 @@ export default function EditTranscript(props){
     // Set initial state values for transcript ID and transcript text.
     const [transcriptID, setTranscriptID] = useState(props.transcriptID);
     const [transcript, setTranscript] = useState(props.transcript);
+    const [transcriptName, setTranscriptName] = useState(props.transcriptName)
 
     // Set initial state value for transcript validity. 
     const [isTranscriptValid, setIsTranscriptValid] = useState(true);
@@ -27,7 +28,8 @@ export default function EditTranscript(props){
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    "transcript" : transcript
+                    "transcript" : transcript,
+                    "transcript_name" : transcriptName
                 })
             })
             .then(response => response.json())
@@ -72,6 +74,10 @@ export default function EditTranscript(props){
         checkTranscript(event.target.value);
     }
 
+    const handleTranscriptNameChange = (event) => {
+        setTranscriptName(event.target.value);
+    }
+
     // Define function to handle closing the edit window.
     const handleClose = () => {
         setShowEditWindow(false);
@@ -83,7 +89,7 @@ export default function EditTranscript(props){
                 <div className="EditWindow">
                     <img className="CloseButton" src = {closeIcon}  alt = "close" onClick = {handleClose} />
                     <form onSubmit={handleSubmit} className="EditWindow--Form">
-                        
+                        <input type="text" value={transcriptName} onChange = {handleTranscriptNameChange}></input>
                         <textarea value={transcript} onChange = {handleTranscriptChange} onBlur={checkTranscript} className={isTranscriptValid ? "valid" : "invalid"}></textarea>
                         
                         <button type="submit">Update Transcript</button>

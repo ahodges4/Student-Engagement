@@ -204,7 +204,8 @@ def Get_POS(text):
     extractor.load_document(input=text, language="en")
 
     # Set the part-of-speech tags to extract candidates from
-    pos = {"PROPN", "NOUN_PROP", "ADJ", "ADV", "VERB", "NUM"}
+    # pos = {"PROPN", "NOUN_PROP", "ADJ", "ADV", "VERB", "NUM"}
+    pos = {"PROPN", "NOUN"}
 
     # Define a list, which contains punctuation and English stopwords
     stoplist = list(string.punctuation) + stopwords.words("english")

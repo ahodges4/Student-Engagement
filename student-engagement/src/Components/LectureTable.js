@@ -12,7 +12,7 @@ import plusIcon from "../icons/plus.png";
 export default function LectureTable(props){
 
     // Destructure props object
-    const { transcripts, lecture } = props;
+
 
     // State variables
     const [rows, setRows] = useState([]);
@@ -20,12 +20,14 @@ export default function LectureTable(props){
     const [SelectedTitle, setSelectedTitle] = useState();
     const [lectureTranscripts, setLectureTranscripts] = useState({});
     const [selectedData, setSelectedData] = useState();
-    const [selectedTranscripts, setSelectedTranscripts] = useState();
+    const [selectedTranscripts, setSelectedTranscripts] = useState([]);
 
     const [showEditWindow, setShowEditWindow] = useState(false);
     const [ShowAddWindow, setShowAddWindow] = useState(false);
 
     const [lastDelete, setLastDelete] = useState(null);
+
+    const [selectedModel , setSelectedModel] = useState("t5");
 
     // Function to update fields from server
     const updateFields = () => {
@@ -78,7 +80,7 @@ export default function LectureTable(props){
         console.log(selectedRow);
         console.log(selectedTranscripts);
 
-        props.onSubmit(selectedRow, selectedTranscripts);
+        props.onSubmit(selectedRow, selectedTranscripts, selectedModel);
     }
 
     // Add button click handler
@@ -124,6 +126,10 @@ export default function LectureTable(props){
         return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
     }
 
+    const handleModelSelect = (event) => {
+        setSelectedModel(event.target.value);
+    }
+
     
 
     
@@ -158,6 +164,15 @@ export default function LectureTable(props){
                     ))}
                 </tbody>
             </table>
+            <div>
+                <div>
+                    <h3>Model:</h3>
+                    <select id="model-select" onChange={handleModelSelect}>
+                        <option value="t5">T5</option>
+                        <option value="gpt3">GPT-3</option>
+                    </select>
+                </div>
+            </div>
             <button onClick={handleSubmit}>Start Playback for {SelectedTitle}</button>
             {showEditWindow && (
             <EditWindow lectureID= {selectedData.id} lectureTitle={selectedData.lecture_title} lectureURL = {selectedData.lecture_url} transcriptIDs = {selectedTranscripts} setShowEditWindow = {setShowEditWindow} updateTable = {updateFields}/>

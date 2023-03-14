@@ -16,9 +16,13 @@ export default function TranscriptsTable(props) {
             .then((data) => {
                 console.log(data);
                 // Select only the rows whose IDs are in transcriptIDs
-                const selectedIDs = transcriptIDs.filter((id) =>
+                let selectedIDs = [];
+                if (transcriptIDs) {
+                    selectedIDs = transcriptIDs.filter((id) =>
                     data.find((obj) => obj.id === id)
-                );
+                    );
+                }
+                
                 setSelected(selectedIDs);
                 setRows(data.filter((obj) => obj.transcript !== null));
             })
@@ -36,7 +40,11 @@ export default function TranscriptsTable(props) {
             // Add the selected row ID to the selected array
             setSelected([...selected, id]);
             // Add the selected row ID to the transcriptIDs array
-            setTranscriptIDs([...transcriptIDs, id]);
+            if (transcriptIDs) {
+                setTranscriptIDs([...transcriptIDs, id]);
+            }else{
+                setTranscriptIDs([id]);
+            }
             // Set the validity of the transcript IDs to true
             setIsTranscriptIDsValid(true);
         } else {
@@ -64,6 +72,7 @@ export default function TranscriptsTable(props) {
                     <tr>
                         <th></th>
                         <th>ID</th>
+                        <th>Name</th>
                         <th>Transcript</th>
                     </tr>
                 </thead>
@@ -74,6 +83,7 @@ export default function TranscriptsTable(props) {
                                 <input type="checkbox" name="selectedRows" value={obj.id} checked = {selected.includes(obj.id)} onChange={handleCheckboxChange}/>
                             </td>
                             <td>{obj.id}</td>
+                            <td>{obj.transcript_name}</td>
                             <td> <div className="TranscriptTable--Transcript">{obj.transcript}</div></td>
                         </tr>
                     ))}

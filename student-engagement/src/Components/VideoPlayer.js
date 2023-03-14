@@ -14,7 +14,7 @@ import volumeIcon from "../icons/volume.png";
 
 // The VideoPlayer component accepts two props: transcripts and questionInterval
 export default function VideoPlayer(props) {
-    const {lecture_data, transcripts} = props;
+    const {lecture_data, transcripts, model} = props;
 
     // Define states to manage the current time, duration, playing status, next question, current transcript, question data, and whether to show the questions
     const [questionInterval, setQuestionInterval] = useState(null);
@@ -39,7 +39,13 @@ export default function VideoPlayer(props) {
             setNextQuestion(parseInt(nextQuestion) + parseInt(questionInterval));
             // Send a request to fetch questions for the next transcript
             fetch(`http://127.0.0.1:5000/generateTranscriptQuestions/${transcripts[currentTranscript]["id"]}}`, {
-                method: 'POST'
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "model" : model
+                })
             })
             .then(response => response.json())
             .then(data => {

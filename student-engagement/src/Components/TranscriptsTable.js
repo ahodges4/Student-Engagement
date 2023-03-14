@@ -26,6 +26,10 @@ export default function TranscriptsTable(props){
 
     const [lastDelete, setLastDelete] = useState(null); // ID of the last deleted transcript
 
+    const [model, setModel] = useState("t5");
+
+    const [statement, setStatement] = useState();
+
     
     const updateFields = () => {
         // Fetch the data from the API and update the rows in the table
@@ -34,8 +38,14 @@ export default function TranscriptsTable(props){
         .then(data => {
             console.log(data);
             // Select the first transcript with a non-null transcript field
-            setSelected(data.filter(obj => obj.transcript !== null)[0].id)
-            setRows(data.filter(obj => obj.transcript !== null));
+            const filteredData = data.filter(obj => obj.transcript !== null);
+            if (filteredData.length > 0) {
+                setSelected(filteredData[0].id);
+                setStatement(filteredData[0].statement);
+            } else {
+                setSelected(null);
+            }
+            setRows(filteredData);
         })
         .catch(error => {
             console.error(error);
@@ -53,17 +63,29 @@ export default function TranscriptsTable(props){
     }, [showButton]);
     
     // Handle radio button changes
-    const handleRadioChange = (event) => {
+    const handleRadioChange = (event, obj) => {
+        setSelectedData(obj);
         setSelected(Number(event.target.value));
+    }
+
+    const handleModelSelect = (event) => {
+        setModel(event.target.value);
     }
     
     // Handle click event for generating questions
     const handleClick = () => {
+        setStatement(selectedData.transcript);
         // Send a POST request to the API to generate questions for the selected transcript
         fetch(`http://127.0.0.1:5000/generateTranscriptQuestions/${document.querySelector('input[name="selectedRow"]:checked').value}`, {
-             method: 'POST'
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "model" : model
+            })
         })
-        .then(resonse => resonse.json())
+        .then(response => response.json())
         .then(data => {
             console.log(data);
             // If questions were generated, show them
@@ -73,7 +95,7 @@ export default function TranscriptsTable(props){
             }
         })
         .catch(error => {
-            error.log(error);
+            console.error(error);
         })
     }
 
@@ -126,6 +148,7 @@ export default function TranscriptsTable(props){
                         <tr>
                             {showButton && (<th></th>)}
                             <th>ID</th>
+                            <th>Name</th>
                             <th>Transcript</th>
                             <th></th>
                             <th><img src={plusIcon} className="LectureTable--AddIcon" alt = "Add" onClick={handleAdd}/></th>
@@ -135,9 +158,10 @@ export default function TranscriptsTable(props){
                         {rows.map((obj) =>(
                             <tr key={obj.id}>
                                 {showButton && (<td className="TranscriptTable--Cell">
-                                    <input type="radio" name="selectedRow" value={obj.id} checked = {obj.id === Selected} onChange={handleRadioChange}/>
+                                    <input type="radio" name="selectedRow" value={obj.id} checked = {obj.id === Selected} onChange={(event) => handleRadioChange(event, obj)}/>
                                 </td>)}
                                 <td className="TranscriptTable--Cell">{obj.id}</td>
+                                <td className="TranscriptTable--Cell">{obj.transcript_name}</td>
                                 <td className="TranscriptTable--Cell"><div className="TranscriptTable--Transcript">{obj.transcript}</div></td>
                                 <td className="TranscriptTable--Cell"><img className="LectureTable--Edit" src = {editIcon} alt="edit" onClick={() => handleEdit(obj)}/></td>
                                 <td className="TranscriptTable--Cell"><img className="LectureTable--Delete" src = {lastDelete===obj.id ? tickIcon : deleteIcon} alt="delete" onClick={() => handleDelete(obj.id)}/></td>
@@ -148,6 +172,13 @@ export default function TranscriptsTable(props){
             )}
             {!showQuestions && showButton && (
                 <div className="TranscriptsTable--SQButton--Div">
+                    <div>
+                        <h3>Model:</h3>
+                        <select id="model-select" onChange={handleModelSelect}>
+                            <option value="t5">T5</option>
+                            <option value="gpt3">GPT-3</option>
+                        </select>
+                    </div>
                     <button onClick={handleClick} className="TranscriptsTable--SQButton"><span>Generate Questions for selected Transcript</span></button>
                 </div>
             )}
@@ -155,13 +186,13 @@ export default function TranscriptsTable(props){
                 <div>
                     <div className="QuestionGrid--QuestionStatement--div-outer">
                         <div className="QuestionGrid--QuestionStatement--div-inner">
-                            <span className="QuestionGrid--QuestionStatement" maxLength = "20">{questionsData.statement}</span>
+                            <span className="QuestionGrid--QuestionStatement" maxLength = "20">{statement}</span>
                         </div>
                     </div>
                     <QuestionGrid questions={questionsData} />
                 </div>
             )}
-            {showEditWindow && (<EditTranscript transcriptID = {selectedData.id} transcript = {selectedData.transcript} setShowEditWindow = {setShowEditWindow} updateTable = {updateFields}/>)}
+            {showEditWindow && (<EditTranscript transcriptID = {selectedData.id} transcript = {selectedData.transcript} transcriptName = {selectedData.transcript_name} setShowEditWindow = {setShowEditWindow} updateTable = {updateFields}/>)}
             {ShowAddWindow && (<AddTranscript setShowAddWindow =  {setShowAddWindow} updateTable = {updateFields}/>)}
         </div>
         

@@ -8,6 +8,7 @@ export default function AddTranscript(props){
 
     // useState hooks to manage component state
     const [transcript, setTranscript] = useState("");
+    const [transcriptName, setTranscriptName] = useState("");
     const [isTranscriptValid, setIsTranscriptValid] = useState(false);
     const [isManual, setIsManual] = useState(true);
     const [videoSelected, setVideoSelected] = useState(false);
@@ -29,7 +30,8 @@ export default function AddTranscript(props){
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    "transcript": transcript
+                    "transcript": transcript,
+                    "transcript_name" : transcriptName
                 })
             })
             .then(response => response.json())
@@ -60,6 +62,10 @@ export default function AddTranscript(props){
         checkTranscript(event.target.value);
     }
 
+    const handleTranscriptNameChange = event => {
+        setTranscriptName(event.target.value);
+    }
+
     // Function to close the modal
     const handleClose = () => {
         setShowAddWindow(false);
@@ -80,7 +86,13 @@ export default function AddTranscript(props){
     // Function to open an audio stream on the server and redirect to the recording page
     const openAudioStream = () => {
         fetch('http://127.0.0.1:5000/openAudioStream', {
-            method: 'POST'
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "transcript_name" : transcriptName
+            })
         })
         .then(response => response.json())
         .then(data => {
@@ -109,17 +121,19 @@ export default function AddTranscript(props){
                         </nav>
                     </div>
                 </header>
-                <div className="EditWindow">
+                <div className="AddWindow">
                     <img className="CloseButton" src = {closeIcon} alt = "Close" onClick = {handleClose} />
                     {isManual && (
-                        <form onSubmit={handleSubmit} className="EditWindow--Form">
-                            <textarea value={transcript} onChange = {handleTranscriptChange} onBlur={checkTranscript} className={isTranscriptValid ? "valid" : "invalid"}></textarea>
+                        <form onSubmit={handleSubmit} className="AddWindow--Form">
+                            Transcript Name: <input type="text" value={transcriptName} className="AddWindow--Manual--Name" onChange = {handleTranscriptNameChange}></input>
+                            Transcript: <textarea value={transcript} onChange = {handleTranscriptChange} onBlur={checkTranscript} className={isTranscriptValid ? "valid" : "invalid"}></textarea>
                             <button type="submit">Create Transcript</button>
                         </form>
                     )}
 
                     {!isManual && (
-                        <div>
+                        <div className="AddWindow--Automatic">
+                            Transcript Name: <input type="text" value={transcriptName} onChange = {handleTranscriptNameChange}></input>
                             <button className="AddTranscript--RecordAudio" onClick={openAudioStream}>Start Recording Speech</button>
                             OR 
                             <FileTranscript/>

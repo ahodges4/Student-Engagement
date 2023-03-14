@@ -1,4 +1,6 @@
 
+import json
+import shutil
 import wave
 from flask_cors import CORS, cross_origin
 import pymysql
@@ -6,6 +8,7 @@ from flaskext.mysql import MySQL
 from flask import jsonify, Flask, request
 from audioStream import AudioStream
 from question_generation.main import Question_Generator
+from question_generation.chatGPT3 import ChatGPT3
 import asyncio
 import traceback
 import socket
@@ -28,6 +31,8 @@ db_password = os.environ.get("DB_PASSWORD")
 activeAudioStreams = {}
 
 Qgen = Question_Generator()
+
+chatGPT = ChatGPT3()
 
 # Enable CORS to allow cross-origin requests
 CORS(app)
@@ -76,11 +81,12 @@ def get_transcript(id):
 def create_transcript():
     # Get the transcript from the request body
     transcript = request.get_json()['transcript']
+    transcript_name = request.get_json()['transcript_name']
 
     # Execute the INSERT query
     try:
         cursor.execute(
-            "INSERT INTO transcripts (transcript) VALUES (%s)", (transcript,))
+            "INSERT INTO transcripts (transcript, transcript_name) VALUES (%s, %s)", (transcript, transcript_name))
         conn.commit()
 
         transcriptID = cursor.lastrowid
@@ -98,14 +104,22 @@ def update_transcript(id):
     transcript = request.get_json()['transcript']
 
     # Execute the UPDATE query
+    try:
+        transcript_name = request.get_json()['transcript_name']
+    except:
+        transcript_name = None
 
     try:
         cursor.execute("SELECT * FROM transcripts WHERE id = %s", (id,))
         result = cursor.fetchone()
         if result == None:
             return jsonify({'error': 'No transcript with that ID'})
-        cursor.execute(
-            "UPDATE transcripts SET transcript = %s WHERE id = %s", (transcript, id))
+        if transcript_name != None:
+            cursor.execute("UPDATE transcripts SET transcript = %s, transcript_name = %s WHERE id = %s",
+                           (transcript, transcript_name, id))
+        else:
+            cursor.execute("UPDATE transcripts SET transcript = %sWHERE id = %s",
+                           (transcript, id))
         conn.commit()
         return jsonify({'message': 'Transcript updated successfully'})
     except:
@@ -153,8 +167,9 @@ def get_next_available_port(start_port):
 async def open_audio_stream():
     # Insert a new transcript record with an empty transcript field
     try:
+        transcript_name = request.get_json()['transcript_name']
         cursor.execute(
-            "INSERT INTO transcripts (transcript) VALUES (null)")
+            "INSERT INTO transcripts (transcript, transcript_name) VALUES (null, %s)", (transcript_name,))
         conn.commit()
 
         # get the ID of the newly created record
@@ -219,7 +234,7 @@ def split_audio(file_path):
     for i in range(len(chunks) - 1):
         start = chunks[i]
         end = chunks[i+1]
-        chunk = audio[start:end]
+        chunk = audio[start:end].set_channels(1)
         filename = os.path.join(new_folder_path, f"chunk{i+1}.wav")
         chunk.export(filename, format="wav", parameters=["-ar", "16000"])
         print(get_audio_length(filename))
@@ -241,15 +256,6 @@ def get_audio_length(filepath):
 @app.route('/generateTranscriptFromFile', methods=['POST'])
 async def generate_transcript_from_file():
 
-    cursor.execute(
-        "INSERT INTO transcripts (transcript) VALUES (null)")
-    conn.commit()
-
-    # get the ID of the newly created record
-    transcriptID = cursor.lastrowid
-
-    NewAudioStream = AudioStream(transcriptID, 0)
-
     if 'file' not in request.files:
         return 'No file found in request'
 
@@ -257,7 +263,29 @@ async def generate_transcript_from_file():
     if file.filename == '':
         return 'No file selected'
 
-    file_path = cwd + '/uploadedVideos/' + file.filename
+    file_path = os.path.join(cwd, 'uploadedVideos', file.filename)
+
+    # Check if the file already exists
+    if os.path.isfile(file_path):
+        os.remove(file_path)
+
+        # Delete the directory with the same name if it exists
+        dir_path = os.path.join(cwd, 'uploadedVideos',
+                                os.path.splitext(file.filename)[0])
+        if os.path.exists(dir_path) and os.path.isdir(dir_path):
+            if not os.listdir(dir_path):
+                os.rmdir(dir_path)
+            else:
+                shutil.rmtree(dir_path)
+
+    cursor.execute(
+        "INSERT INTO transcripts (transcript, transcript_name) VALUES (null, %s)", (file.filename,))
+    conn.commit()
+
+    # get the ID of the newly created record
+    transcriptID = cursor.lastrowid
+
+    NewAudioStream = AudioStream(transcriptID, 0)
 
     # Save the file to disk
     file.save(file_path)
@@ -296,22 +324,54 @@ def generate_questions():
 
 @app.route('/generateTranscriptQuestions/<id>', methods=['POST'])
 def generate_questions_from_transcripts(id):
+
     try:
-        cursor.execute("SELECT * FROM transcripts WHERE id = %s", (id,))
-        result = cursor.fetchone()
-        if result == None:
-            return jsonify({"error": "Transcript not found with ID " + str(id)})
-        print(result["transcript"])
-        text = {"input_text": result["transcript"]}
+        model = request.get_json()['model']
+    except:
+        model = "t5"
 
-        questions = Qgen.generate_MCQs(text)
+    if (model == "t5"):
 
-        return questions
+        try:
+            cursor.execute("SELECT * FROM transcripts WHERE id = %s", (id,))
+            result = cursor.fetchone()
+            if result == None:
+                return jsonify({"error": "Transcript not found with ID " + str(id)})
+            print(result["transcript"])
+            text = {"input_text": result["transcript"]}
 
-    except Exception as e:
-        tb = traceback.format_exc()
-        print(f"Error: {e}\n{tb}")
-        return jsonify({'error': 'Failed to create questions of transcript : ' + str(e)})
+            questions = Qgen.generate_MCQs(text)
+
+            return questions
+
+        except Exception as e:
+            tb = traceback.format_exc()
+            print(f"Error: {e}\n{tb}")
+            return jsonify({'error': 'Failed to create questions of transcript : ' + str(e)})
+
+    elif (model == "gpt3"):
+
+        try:
+            cursor.execute("SELECT * FROM transcripts WHERE id = %s", (id,))
+            result = cursor.fetchone()
+            if result == None:
+                return jsonify({"error": "Transcript not found with ID " + str(id)})
+            print(result["transcript"])
+
+            questions = chatGPT.getResponse(result["transcript"])
+
+            print("\n\n1: " + questions.strip())
+
+            questions = questions.strip()
+
+            questions = json.loads(questions)
+
+            return jsonify(questions)
+
+        except Exception as e:
+            tb = traceback.format_exc()
+            print(f"Error: {e}\n{tb}")
+            return jsonify({'error': 'Failed to create questions of transcript : ' + str(e)})
 
 
 @app.route('/lectures', methods=['GET'])

@@ -35,7 +35,15 @@ export default function Question({ question }) {
   
   // The useEffect hook is used to shuffle the answer options every time the `question` prop changes.
   useEffect(() => {
-    const options = shuffle([...question.options, ...question.extra_options, question.answer])
+    let options = [...question.options];
+    options = options.filter(option => option !== question.answer);
+    options = [...options, question.answer]
+    if (question.extra_options) {
+      options = shuffle([...options, ...question.extra_options]);
+    } else {
+      options = shuffle(options);
+    }
+    
     setShuffledOptions(options);
   }, [question]);
 
@@ -47,7 +55,7 @@ export default function Question({ question }) {
       <ul>
       {shuffledOptions.map(option => (
         <li className='Question--options'
-          key={option}
+          key={`${question.id}-${option}`} // set a unique key for each option
           style={{
             color: hasAnswered  && option === question.answer ? 'green' :
             hasAnswered && option === selectedOption ? 'red' : 'inherit'

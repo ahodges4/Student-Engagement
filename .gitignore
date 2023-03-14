@@ -3,3 +3,5 @@ flask-app/question_generation/._s2v_old/
 *.wav
 venv
 flask-app/uploadedVideos/*
+flask-app/.env
+

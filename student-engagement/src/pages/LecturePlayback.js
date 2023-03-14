@@ -13,12 +13,14 @@ export default function LecturePlayback(){
     const [isSetup, setIsSetup] = useState(false);
     const [transcripts, setTranscripts] = useState({});
     const [data, setData] = useState();
+    const [selectedModel, setSelectedModel] = useState();
 
     // This function is called when the user submits the lecture information form
-    const handleSubmit = (data, transcripts) => {
+    const handleSubmit = (data, transcripts, model) => {
 
         // Assign data about lecture to data state
         setData(data);
+        setSelectedModel(model);
 
         // This creates an empty array to store the transcript data for each individual transcript
         const newTranscripts = [];
@@ -55,7 +57,7 @@ export default function LecturePlayback(){
     return(
         <div>
             {isSetup ? (
-                <VideoPlayer lecture_data={data} transcripts={transcripts} />
+                <VideoPlayer lecture_data={data} transcripts={transcripts} model={selectedModel} />
                 ) : (
                 <LectureTable onSubmit={handleSubmit} />
                 )}
