@@ -41,7 +41,7 @@ export default function TranscriptsTable(props){
             const filteredData = data.filter(obj => obj.transcript !== null);
             if (filteredData.length > 0) {
                 setSelected(filteredData[0].id);
-                setStatement(filteredData[0].statement);
+                setSelectedData(filteredData[0]);
             } else {
                 setSelected(null);
             }

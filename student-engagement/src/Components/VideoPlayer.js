@@ -27,14 +27,14 @@ export default function VideoPlayer(props) {
     const [showQuestions, setShowQuestions] = useState(false);
     const [questionData, setQuestionData] = useState(null);
     const [resumeFrom, setResumeFrom] = useState(0); // new state to store current time before showing questions
-    const [fullscreen, setFullscreen] = useState(false);
     const [showVolumeControl, setShowVolumeControl] = useState(false);
     const [volume, setVolume] = useState(0.5);
 
     // This function is called whenever the video player's progress changes
     const handleProgress = (state) => {
         setCurrentTime(state.playedSeconds);
-        if (currentTime > nextQuestion) {
+        if (currentTime+20 > nextQuestion) {
+            console.log("getting Quesitons");
             // Update the next question time
             setNextQuestion(parseInt(nextQuestion) + parseInt(questionInterval));
             // Send a request to fetch questions for the next transcript
@@ -71,9 +71,10 @@ export default function VideoPlayer(props) {
     const handleDuration = (duration) => {
         console.log("Duration");
         if (questionInterval === null){
-            const questionIntervalTemp = duration/(transcripts.length+1);
+            const questionIntervalTemp = duration/(transcripts.length);
             setQuestionInterval(questionIntervalTemp);
             setNextQuestion(questionIntervalTemp);
+            console.log(questionIntervalTemp);
         }
         
         setDuration(duration);
@@ -113,7 +114,7 @@ export default function VideoPlayer(props) {
 
     const handleGoToNextInterval = () => {
         console.log(nextQuestion);
-        playerRef.current?.seekTo(nextQuestion);
+        playerRef.current?.seekTo(nextQuestion-20);
     }
 
     const handleVolumeChange = (event) => {
