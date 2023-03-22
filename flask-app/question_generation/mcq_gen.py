@@ -7,6 +7,7 @@ from flashtext import KeywordProcessor
 import pke
 import torch
 
+
 # Check if there are any multiple choice questions available for a specific word using sense2vec
 
 
@@ -156,6 +157,19 @@ def Find_Setences_With_Keyword(keywords, sentences):
     # Return the dict of sentences containing each keyword
     return Matching_Sentences
 
+# Add <hl> tags to key word in snippet
+
+
+def Tag_Keywords(key, snippet):
+    tagged_snippet = ""
+    for word in snippet:
+        if word.lower() == key.lower():
+            tagged_snippet += "<hl>" + word + "</hl> "
+        else:
+            tagged_snippet += word + " "
+
+    return tagged_snippet
+
 
 def Words_Far_Apart(words, currWord, threshold, normalized_levenshtein):
     scores = []
@@ -205,7 +219,7 @@ def Get_POS(text):
 
     # Set the part-of-speech tags to extract candidates from
     # pos = {"PROPN", "NOUN_PROP", "ADJ", "ADV", "VERB", "NUM"}
-    pos = {"PROPN", "NOUN"}
+    pos = {"PROPN", "NOUN", "NUM"}
 
     # Define a list, which contains punctuation and English stopwords
     stoplist = list(string.punctuation) + stopwords.words("english")
@@ -310,7 +324,71 @@ def Get_Possible_Answers(nlp, text, keywords_limit, s2v, freq_dist, normalized_l
 # Generate multiple choice questions based on the input text
 
 
-def Get_Multi_Choice_Questions(sentence_Filtered_Keyword, processor, tokenizer, model, sense2vec, normalized_levenshtein):
+def Get_Multi_Choice_Questions_Base(sentence_Filtered_Keyword, processor, tokenizer, model, sense2vec, normalized_levenshtein):
+
+    # Get the correct answers
+    answers = sentence_Filtered_Keyword.keys()
+
+    # Init output array
+    output_dict = {}
+    output_dict["questions"] = []
+    for i, answer in enumerate(answers):
+        # Create individual question objects
+        question = {}
+
+        # Get the context
+        text = sentence_Filtered_Keyword[answer]
+
+        # Highlight the correct answer in the context
+        text = text.replace(answer, f"<hl>{answer}<hl>")
+
+        print("\n\nSentence_Filtered_Keywords Text:\n" +
+              text+"\n\n\n")
+
+        # Generate Questions using T5 model
+        # Add instruction for conditional Generator to use
+        input_text = f"Generate Question: {text}"
+
+        # Encode the text into tensorflow object
+        input_ids = tokenizer.encode(
+            input_text, return_tensors="pt").to(processor)
+
+        # Generate the questions using model
+        outputs = model.generate(
+            input_ids=input_ids, max_length=128, do_sample=True, num_return_sequences=1)
+
+        # Decode into text
+        question_text = tokenizer.decode(
+            outputs[0], skip_special_tokens=True).strip()
+
+        print("Queston: " + question_text)
+
+        # Populate individual question object
+        question["question_statement"] = question_text
+        question["question_type"] = "MCQ"
+        question["answer"] = answer.title()
+        question["id"] = i + 1
+
+        # Get incorrect answers for the Question
+        question["options"], question["options_algorithm"] = Get_Incorrect_Answers(
+            answer, sense2vec)
+
+        # Filter and limit incorrect answers to 3
+        question["options"] = filter_phrases(
+            question["options"], 10, normalized_levenshtein)
+        i = 3
+        question["extra_options"] = question["options"][i:]
+        question["options"] = question["options"][:i]
+        question["context"] = sentence_Filtered_Keyword[answer]
+
+        if len(question["options"]) > 0:
+            # Append the generated question to output
+            output_dict["questions"].append(question)
+
+    return output_dict
+
+
+def Get_Multi_Choice_Questions_Result(sentence_Filtered_Keyword, processor, tokenizer, model, sense2vec, normalized_levenshtein):
     # Create batch text with context and answer
 
     batch_text = []

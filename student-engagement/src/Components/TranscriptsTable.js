@@ -26,7 +26,7 @@ export default function TranscriptsTable(props){
 
     const [lastDelete, setLastDelete] = useState(null); // ID of the last deleted transcript
 
-    const [model, setModel] = useState("t5");
+    const [model, setModel] = useState("t5-result");
 
     const [statement, setStatement] = useState();
 
@@ -175,7 +175,8 @@ export default function TranscriptsTable(props){
                     <div>
                         <h3>Model:</h3>
                         <select id="model-select" onChange={handleModelSelect}>
-                            <option value="t5">T5</option>
+                            <option value="t5-result">T5- Parth/Result</option>
+                            <option value="t5-base">T5 - Valhalla/t5-base-qa-qg-hl</option>
                             <option value="gpt3">GPT-3</option>
                         </select>
                     </div>

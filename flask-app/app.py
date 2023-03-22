@@ -330,26 +330,7 @@ def generate_questions_from_transcripts(id):
     except:
         model = "t5"
 
-    if (model == "t5"):
-
-        try:
-            cursor.execute("SELECT * FROM transcripts WHERE id = %s", (id,))
-            result = cursor.fetchone()
-            if result == None:
-                return jsonify({"error": "Transcript not found with ID " + str(id)})
-            print(result["transcript"])
-            text = {"input_text": result["transcript"]}
-
-            questions = Qgen.generate_MCQs(text)
-
-            return questions
-
-        except Exception as e:
-            tb = traceback.format_exc()
-            print(f"Error: {e}\n{tb}")
-            return jsonify({'error': 'Failed to create questions of transcript : ' + str(e)})
-
-    elif (model == "gpt3"):
+    if (model == "gpt3"):
 
         try:
             cursor.execute("SELECT * FROM transcripts WHERE id = %s", (id,))
@@ -367,6 +348,25 @@ def generate_questions_from_transcripts(id):
             questions = json.loads(questions)
 
             return jsonify(questions)
+
+        except Exception as e:
+            tb = traceback.format_exc()
+            print(f"Error: {e}\n{tb}")
+            return jsonify({'error': 'Failed to create questions of transcript : ' + str(e)})
+
+    else:
+
+        try:
+            cursor.execute("SELECT * FROM transcripts WHERE id = %s", (id,))
+            result = cursor.fetchone()
+            if result == None:
+                return jsonify({"error": "Transcript not found with ID " + str(id)})
+            print(result["transcript"])
+            text = {"input_text": result["transcript"]}
+
+            questions = Qgen.generate_MCQs(text, model)
+
+            return questions
 
         except Exception as e:
             tb = traceback.format_exc()
