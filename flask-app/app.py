@@ -236,7 +236,7 @@ def split_audio(file_path):
         end = chunks[i+1]
         chunk = audio[start:end].set_channels(1)
         filename = os.path.join(new_folder_path, f"chunk{i+1}.wav")
-        chunk.export(filename, format="wav", parameters=["-ar", "16000"])
+        chunk.export(filename, format="wav", parameters=["-ar", "48000"])
         print(get_audio_length(filename))
         print(f"Saved chunk {i+1} as {filename}")
         wav_files.append(filename)

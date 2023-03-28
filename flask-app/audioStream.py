@@ -35,9 +35,9 @@ class AudioStream:
         audio = speech.RecognitionAudio(content=content)
         config = speech.RecognitionConfig(
             encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
-            sample_rate_hertz=16000,
             language_code="en-GB",
             enable_automatic_punctuation=True,
+            model="latest_long"
         )
 
         response = client.recognize(config=config, audio=audio)
@@ -68,13 +68,13 @@ class AudioStream:
 
             self.buffer.append(decoded_data)
 
-            if len(self.buffer) == 3:
+            if len(self.buffer) == 6:
                 audio = np.concatenate(self.buffer)
 
                 with wave.open("output"+str(self.transcriptID)+".wav", "wb") as f:
                     f.setnchannels(1)
                     f.setsampwidth(2)
-                    f.setframerate(16000)
+                    f.setframerate(48000)
                     f.writeframes(audio.tobytes())
                 print("Saved")
                 self.transcribe_file("output"+str(self.transcriptID)+".wav")

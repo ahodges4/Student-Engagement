@@ -66,7 +66,7 @@ export default function ReturnField(){
             const recorder = RecordRTC(stream, {
                 type: 'audio',
                 mimeType: 'audio/webm',
-                desiredSampRate: 16000,
+                desiredSampRate: 48000,
                 recorderType: StereoAudioRecorder,
                 numberOfAudioChannels: 1,
                 // get intervals based blobs
