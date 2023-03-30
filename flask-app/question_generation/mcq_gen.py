@@ -6,6 +6,7 @@ from nltk.corpus import stopwords
 from flashtext import KeywordProcessor
 import pke
 import torch
+import nltk
 
 
 # Check if there are any multiple choice questions available for a specific word using sense2vec
@@ -120,6 +121,7 @@ def Get_Sentences(text):
 
 
 def Find_Setences_With_Keyword(keywords, sentences):
+
     # Init Keyword Processor Object
     keyword_processor = KeywordProcessor()
     # Init empty dictionary to store sentences containing keywords
@@ -138,7 +140,8 @@ def Find_Setences_With_Keyword(keywords, sentences):
         Matching_Keywords = keyword_processor.extract_keywords(sentence)
         # Loop through each matching keyword in the sentence and add the sentence to the corresponding list in the dict
         for Keyword in Matching_Keywords:
-            Matching_Sentences[Keyword].append(sentence)
+            if sentence not in Matching_Sentences[Keyword]:
+                Matching_Sentences[Keyword].append(sentence)
 
     # Sort the sentences contain each keyword by length in desc order
     for Keyword in Matching_Sentences.keys():
@@ -208,9 +211,23 @@ def filter_phrases(phrases, max, normalized_levenshtein):
 # Get a list of important nouns and proper nouns in the text
 
 
+def extract_numbers(text):
+    tokens = nltk.word_tokenize(text)
+    tagged_tokens = nltk.pos_tag(tokens)
+
+    numbers = []
+    for token, tag in tagged_tokens:
+        if tag == 'CD':
+            numbers.append(token)
+
+    return numbers
+
+
 def Get_POS(text):
     POS = []
-
+    numbers = extract_numbers(text)
+    for n in numbers:
+        POS.append(n)
     # Initialize the MultipartiteRank extractor
     extractor = pke.unsupervised.MultipartiteRank()
 
@@ -219,10 +236,7 @@ def Get_POS(text):
 
     # Set the part-of-speech tags to extract candidates from
     # pos = {"PROPN", "NOUN_PROP", "ADJ", "ADV", "VERB", "NUM"}
-    pos = {"PROPN", "NOUN", "NUM"}
-
-    # Define a list, which contains punctuation and English stopwords
-    stoplist = list(string.punctuation) + stopwords.words("english")
+    pos = {"PROPN", "NOUN", "ADJ"}
 
     # Select the candidate keyphrases using the specified parts of speech and stoplist
     extractor.candidate_selection(pos=pos)
@@ -276,7 +290,6 @@ def Get_Common_Phrases(document):
 
     # Keep only the top 50 longest phrases
     Dict_Phrases = Dict_Phrases[:50]
-
     return Dict_Phrases
 
 # Return list of top keywords that could be used as answers for MCQs
@@ -292,6 +305,7 @@ def Get_Possible_Answers(nlp, text, keywords_limit, s2v, freq_dist, normalized_l
 
     # Get key Nouns using MultipartiteRank algorithm and sort them by their frequency
     Nouns = Get_POS(text)
+
     Nouns = sorted(Nouns, key=lambda x: freq_dist[x])
 
     # Filter out phrases that are too similar and keep only the top max_keywords
@@ -319,6 +333,7 @@ def Get_Possible_Answers(nlp, text, keywords_limit, s2v, freq_dist, normalized_l
             Possible_Answers.append(possible_answer)
 
     Possible_Answers = Possible_Answers[:keywords_limit]
+
     return Possible_Answers
 
 # Generate multiple choice questions based on the input text
